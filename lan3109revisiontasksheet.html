@@ -1,0 +1,1416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LAN3109 Revision Hub</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-dark: #3730a3;
+            --primary-gradient: linear-gradient(135deg, #312e81 0%, #4f46e5 100%);
+            --bg-gradient: linear-gradient(135deg, #e0e7ff 0%, #f8fafc 50%, #f1f5f9 100%);
+            --card-bg: #ffffff;
+            --text: #0f172a;
+            --text-muted: #475569;
+            --border: #000000;
+            
+            /* Hint Bubble Colors */
+            --yellow-bubble: #fef08a;
+            --yellow-border: #eab308;
+            --purple-bubble: #e9d5ff;
+            --purple-border: #a855f7;
+
+            /* Syllable Colors */
+            --syl1: #38bdf8;
+            --syl2: #f472b6;
+            --syl3: #4ade80;
+            --syl4: #fbbf24;
+
+            /* Page 2 Exclusive styling tokens safely integrated */
+            --p2-success: #059669;
+            --p2-success-light: #ecfdf5;
+            --p2-danger: #dc2626;
+            --p2-danger-light: #fef2f2;
+            --p2-warning-light: #fffbeb;
+            --p2-border-light: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            background-attachment: fixed;
+            color: var(--text);
+            padding: 40px 20px 120px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* --- SPA View Navigation Wrapper Logic --- */
+        .page-view {
+            display: none;
+            width: 100%;
+            max-width: 950px;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .page-view.active {
+            display: flex;
+        }
+
+        /* --- PAGE 1 ELEMENTS --- */
+        .main-header {
+            width: 100%;
+            background: var(--primary-gradient);
+            color: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.2);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .main-header h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            margin-bottom: 8px;
+        }
+
+        .main-header p {
+            color: #cbd5e1;
+            font-size: 1rem;
+        }
+
+        .meta-container {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        }
+
+        .student-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .student-meta input, .setup-box select {
+            padding: 10px 16px;
+            border: 2px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 1rem;
+            width: 280px;
+            outline: none;
+            background-color: white;
+            transition: all 0.2s;
+        }
+        .student-meta input:focus, .setup-box select:focus { 
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(165, 180, 252, 0.4);
+        }
+
+        .instruction-tag {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            background: #ffffff;
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .situation-card {
+            width: 100%;
+            margin-bottom: 50px;
+            background: transparent;
+        }
+
+        .sit-title {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #1e1b4b;
+            margin-bottom: 10px;
+        }
+
+        .sit-desc {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            margin-bottom: 20px;
+            color: #1e293b;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            border-left: 5px solid var(--primary);
+        }
+
+        .clickable-word {
+            position: relative;
+            cursor: pointer;
+            padding: 0 4px;
+            border-radius: 4px;
+            transition: all 0.2s;
+            display: inline-block;
+            font-weight: 600;
+        }
+        .clickable-word:hover {
+            background-color: #cbd5e1;
+        }
+
+        .word-tooltip {
+            position: absolute;
+            bottom: 130%;
+            left: 50%;
+            transform: translateX(-50%) scale(0.9);
+            background: #1e1b4b;
+            color: white;
+            padding: 10px 14px;
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 99;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        .word-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 6px;
+            border-style: solid;
+            border-color: #1e1b4b transparent transparent transparent;
+        }
+        .clickable-word.active-syl .word-tooltip {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateX(-50%) scale(1);
+        }
+
+        .syl-display {
+            font-size: 1.25rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            white-space: nowrap;
+        }
+
+        .syl-part { padding: 0 1px; }
+        .syl-c0 { color: var(--syl1); }
+        .syl-c1 { color: var(--syl2); }
+        .syl-c2 { color: var(--syl3); }
+        .syl-c3 { color: var(--syl4); }
+
+        .btn-word-mic {
+            background: #4f46e5;
+            color: white;
+            border: none;
+            padding: 4px 10px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            border-radius: 4px;
+            cursor: pointer;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: background 0.2s;
+        }
+        .btn-word-mic:hover { background: #6366f1; }
+        .btn-word-mic.recording { background: #dc2626; }
+
+        .word-correct {
+            color: #16a34a !important;
+            text-shadow: 0 0 8px rgba(22, 163, 74, 0.2);
+        }
+        .word-incorrect {
+            color: #dc2626 !important;
+            text-decoration: underline wavy #ef4444;
+        }
+
+        .workspace-box {
+            border: 2px solid var(--border);
+            background: #ffffff;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 20px -10px rgba(0,0,0,0.15);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+
+        .section-row {
+            display: flex;
+            border-bottom: 2px solid var(--border);
+            min-height: 150px;
+        }
+        .section-row:last-child { border-bottom: none; }
+
+        .left-content {
+            flex: 1;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 18px;
+        }
+
+        .label-heading {
+            font-style: italic;
+            font-weight: 700;
+            font-size: 1.15rem;
+        }
+        .label-heading span { text-decoration: underline; }
+
+        .bullet-input-group {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .bullet-point {
+            font-size: 1.6rem;
+            line-height: 1;
+            margin-top: 3px;
+        }
+
+        textarea {
+            width: 100%;
+            border: none;
+            border-bottom: 1px dashed #94a3b8;
+            font-size: 1.1rem;
+            padding: 4px 0;
+            resize: none;
+            outline: none;
+            color: #000000;
+            background: transparent;
+        }
+
+        .right-hint-sidebar {
+            width: 340px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-left: 1px solid #cbd5e1;
+            background: #fafafa;
+        }
+
+        .hint-pointer-tag {
+            position: relative;
+            padding: 16px 20px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            line-height: 1.4;
+            width: 100%;
+        }
+
+        .hint-pointer-tag::before {
+            content: '';
+            position: absolute;
+            left: -12px;
+            top: 50%;
+            transform: translateY(-50%);
+            border-top: 12px solid transparent;
+            border-bottom: 12px solid transparent;
+        }
+
+        .yellow-tag { border: 2px solid var(--yellow-border); background-color: var(--yellow-bubble); color: #713f12; }
+        .yellow-tag::before { border-right: 12px solid var(--yellow-border); }
+
+        .purple-tag { border: 2px solid var(--purple-border); background-color: var(--purple-bubble); color: #581c87; }
+        .purple-tag::before { border-right: 12px solid var(--purple-border); }
+
+        .card-actions-footer {
+            display: flex;
+            justify-content: flex-start;
+            width: 100%;
+            padding: 4px 0 0 0;
+        }
+
+        .btn-local-clear {
+            background: #ffffff;
+            color: #dc2626;
+            border: 1px solid #fca5a5;
+            padding: 8px 16px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .btn-local-clear:hover {
+            background: #fef2f2;
+            border-color: #ef4444;
+        }
+
+        .footer-action-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
+            border-top: 1px solid #cbd5e1;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            box-shadow: 0 -10px 25px -5px rgba(0,0,0,0.08);
+            z-index: 500;
+        }
+
+        .btn-download { 
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            color: white; 
+            padding: 14px 40px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+        }
+
+        /* --- FLOATING TRANSITION SHORTCUT (Bottom-Right of Page 1) --- */
+        .nav-floating-btn {
+            position: fixed;
+            bottom: 90px; /* Elevated high enough to sit safely above fixed action bars if needed */
+            right: 30px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 16px 28px;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 700;
+            box-shadow: 0 10px 25px rgba(79, 70, 229, 0.35);
+            border: none;
+            cursor: pointer;
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .nav-floating-btn:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 14px 30px rgba(79, 70, 229, 0.45);
+        }
+
+        /* --- PAGE 2 EXCLUSIVE STYLING --- */
+        .setup-box {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            background: rgba(255, 255, 255, 0.12);
+            padding: 16px 24px;
+            border-radius: 14px;
+            backdrop-filter: blur(8px);
+            margin-top: 15px;
+        }
+        .setup-box label { color: white; }
+
+        .list-container {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            margin-bottom: 50px;
+        }
+
+        .category-heading {
+            font-size: 1.45rem;
+            font-weight: 700;
+            color: #1e1b4b;
+            margin: 35px 0 12px 5px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .category-heading::before {
+            content: '';
+            display: inline-block;
+            width: 6px;
+            height: 24px;
+            background-color: var(--primary);
+            border-radius: 4px;
+        }
+
+        .word-row {
+            background: var(--card-bg);
+            border: 1px solid var(--p2-border-light);
+            border-radius: 14px;
+            padding: 20px 24px;
+            display: grid;
+            grid-template-columns: 45px auto 1fr auto;
+            align-items: center;
+            gap: 20px;
+            transition: all 0.2s;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+            width: 100%;
+        }
+
+        .word-row:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+            border-color: #cbd5e1;
+        }
+
+        .word-index {
+            font-weight: 700;
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            background: #f1f5f9;
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .star-container {
+            cursor: pointer;
+            font-size: 1.6rem;
+            color: #cbd5e1;
+            user-select: none;
+            transition: transform 0.15s ease, color 0.2s ease;
+        }
+        .star-container:hover { transform: scale(1.2); }
+        .star-container.starred { color: #f59e0b; }
+
+        .word-main {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .word-text {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #1e293b;
+            letter-spacing: -0.3px;
+        }
+
+        .syllable-hint, .chinese-hint {
+            font-size: 1.05rem;
+            font-weight: 600;
+            display: none;
+            padding: 6px 14px;
+            border-radius: 8px;
+            width: fit-content;
+            margin-top: 4px;
+            animation: p2FadeIn 0.25s ease-out;
+        }
+
+        .syllable-hint {
+            border-left: 4px solid #eab308;
+            background: #f8fafc;
+            letter-spacing: 1px;
+        }
+
+        .chinese-hint {
+            color: #047857;
+            background: #f0fdf4;
+            border-left: 4px solid #10b981;
+        }
+
+        @keyframes p2FadeIn {
+            from { opacity: 0; transform: translateY(-4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .syl-p2-0 { color: #2563eb; }
+        .syl-p2-1 { color: #db2777; }
+        .syl-p2-2 { color: #059669; }
+        .syl-p2-3 { color: #b45309; }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .actions button {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .btn-listen { background-color: #e0e7ff; color: var(--primary-dark); }
+        .btn-listen:hover { background-color: #c7d2fe; }
+
+        .btn-hint { background-color: var(--p2-warning-light); color: #92400e; }
+        .btn-hint:hover { background-color: #fef3c7; }
+        .btn-hint.active { background-color: #92400e; color: white; }
+
+        .btn-chinese { background-color: #ecfdf5; color: #065f46; }
+        .btn-chinese:hover { background-color: #d1fae5; }
+        .btn-chinese.active { background-color: #065f46; color: white; }
+
+        .btn-speak { background-color: #f1f5f9; color: #475569; border: 1px solid var(--p2-border-light); }
+        .btn-speak:hover { background-color: #e2e8f0; color: var(--text); }
+        
+        .btn-speak.recording { 
+            background-color: var(--p2-danger); 
+            color: white; 
+            border-color: var(--p2-danger);
+            animation: pulseMicrophone 1.5s infinite; 
+        }
+
+        @keyframes pulseMicrophone {
+            0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4); }
+            70% { box-shadow: 0 0 0 8px rgba(220, 38, 38, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+        }
+
+        .status-badge {
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            display: none;
+            text-align: center;
+        }
+
+        .status-badge.correct { background-color: var(--p2-success-light); color: var(--p2-success); display: inline-block; }
+        .status-badge.incorrect { background-color: var(--p2-danger-light); color: var(--p2-danger); display: inline-block; }
+
+        .transcript-feedback {
+            font-size: 0.85rem;
+            color: var(--p2-danger);
+            margin-top: 4px;
+            font-weight: 500;
+        }
+
+        .p2-footer-action-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.04);
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            z-index: 500;
+            border-top: 1px solid var(--p2-border-light);
+        }
+
+        .btn-report {
+            background: linear-gradient(135deg, var(--p2-success) 0%, #047857 100%);
+            color: white;
+            padding: 14px 30px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(5, 150, 105, 0.25);
+        }
+        .btn-report:hover {
+            box-shadow: 0 6px 20px rgba(5, 150, 105, 0.35);
+        }
+
+        .progress-text {
+            font-weight: 700;
+            color: #1e293b;
+            font-size: 1.1rem;
+            background: #e2e8f0;
+            padding: 8px 20px;
+            border-radius: 30px;
+        }
+
+        .btn-to-tasks {
+            background-color: #64748b;
+            color: white;
+            padding: 12px 22px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+        .btn-to-tasks:hover { background-color: #475569; }
+    </style>
+</head>
+<body>
+
+    <div id="page1" class="page-view active">
+        <header class="main-header">
+            <h1>LAN3109 Revision Task Sheet</h1>
+            <p>Analyze scenarios, practice reading target vocabulary, and draft your professional responses.</p>
+        </header>
+
+        <div class="meta-container">
+            <div class="student-meta">
+                <label for="studentName"><strong>Student Name:</strong></label>
+                <input type="text" id="studentName" placeholder="Type full name..." oninput="syncStudentName(this.value)">
+            </div>
+            <div class="instruction-tag">
+                🗣️ Click any word to hear it &amp; check your pronunciation directly in the popup bubble!
+            </div>
+        </div>
+
+        <div class="situation-card" id="card_s1">
+            <h2 class="sit-title">Situation 1</h2>
+            <p class="sit-desc" id="desc1"></p>
+            
+            <div class="workspace-box">
+                <div class="section-row">
+                    <div class="left-content">
+                        <div class="label-heading">Why <span>join?</span>*</div>
+                        <div class="bullet-input-group">
+                            <span class="bullet-point">•</span>
+                            <textarea id="s1_q1" rows="1" placeholder="Reason 1..." oninput="handleTyping(this)"></textarea>
+                        </div>
+                        <div class="bullet-input-group">
+                            <span class="bullet-point">•</span>
+                            <textarea id="s1_q2" rows="1" placeholder="Reason 2..." oninput="handleTyping(this)"></textarea>
+                        </div>
+                    </div>
+                    <div class="right-hint-sidebar">
+                        <div class="hint-pointer-tag yellow-tag">What are the benefits of joining the event?</div>
+                    </div>
+                </div>
+                <div class="section-row">
+                    <div class="left-content">
+                        <div class="label-heading">Special offer:</div>
+                        <div class="bullet-input-group">
+                            <textarea id="s1_offer" rows="2" placeholder="Describe special promotion specifics..." oninput="handleTyping(this)"></textarea>
+                        </div>
+                    </div>
+                    <div class="right-hint-sidebar">
+                        <div class="hint-pointer-tag purple-tag">What special offer would motivate the target group to join the event?</div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-actions-footer">
+                <button class="btn-local-clear" onclick="clearSituation('s1')">🔄 Clear Situation 1</button>
+            </div>
+        </div>
+
+        <div class="situation-card" id="card_s2">
+            <h2 class="sit-title">Situation 2</h2>
+            <p class="sit-desc" id="desc2"></p>
+            
+            <div class="workspace-box">
+                <div class="section-row">
+                    <div class="left-content">
+                        <div class="label-heading">Why <span>join?</span>*</div>
+                        <div class="bullet-input-group">
+                            <span class="bullet-point">•</span>
+                            <textarea id="s2_q1" rows="1" placeholder="Reason 1..." oninput="handleTyping(this)"></textarea>
+                        </div>
+                        <div class="bullet-input-group">
+                            <span class="bullet-point">•</span>
+                            <textarea id="s2_q2" rows="1" placeholder="Reason 2..." oninput="handleTyping(this)"></textarea>
+                        </div>
+                    </div>
+                    <div class="right-hint-sidebar">
+                        <div class="hint-pointer-tag yellow-tag">What are the benefits of joining the workshop?</div>
+                    </div>
+                </div>
+                <div class="section-row">
+                    <div class="left-content">
+                        <div class="label-heading">Special offer:</div>
+                        <div class="bullet-input-group">
+                            <textarea id="s2_offer" rows="2" placeholder="Describe special promotion specifics..." oninput="handleTyping(this)"></textarea>
+                        </div>
+                    </div>
+                    <div class="right-hint-sidebar">
+                        <div class="hint-pointer-tag purple-tag">What special offer would motivate the target group to join the workshop?</div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-actions-footer">
+                <button class="btn-local-clear" onclick="clearSituation('s2')">🔄 Clear Situation 2</button>
+            </div>
+        </div>
+
+        <div class="footer-action-bar">
+            <button class="btn-download" onclick="exportToWorksheet()">💾 Download Completed Worksheet (PDF)</button>
+        </div>
+
+        <button class="nav-floating-btn" onclick="navigateToPage('page2')">
+            Go to Pronunciation Practice ➔
+        </button>
+    </div>
+
+
+    <div id="page2" class="page-view">
+        <header class="main-header">
+            <h1>LAN3109 Phonetic Pronunciation Hub</h1>
+            <p>Listen to the target words, analyze syllable parameters, and calibrate your speech patterns!</p>
+            <div class="setup-box">
+                <div class="input-group" style="display: flex; align-items: center; gap: 10px;">
+                    <label for="studentNameP2"><strong>Student Name:</strong></label>
+                    <input type="text" id="studentNameP2" placeholder="Type full name..." oninput="syncStudentName(this.value)">
+                </div>
+                <div class="input-group" style="display: flex; align-items: center; gap: 10px;">
+                    <label for="voiceAccent"><strong>Voice Accent:</strong></label>
+                    <select id="voiceAccent">
+                        <option value="us-female">🇺🇸 American (Female)</option>
+                        <option value="us-male">🇺🇸 American (Male)</option>
+                        <option value="uk-female">🇬🇧 British (Female)</option>
+                        <option value="uk-male">🇬🇧 British (Male)</option>
+                    </select>
+                </div>
+            </div>
+        </header>
+
+        <div class="list-container" id="vocabList"></div>
+
+        <div class="p2-footer-action-bar">
+            <button class="btn-to-tasks" onclick="navigateToPage('page1')">⬅ Return to Tasks</button>
+            <span class="progress-text" id="progressTracker">Attempted: 0 / 50 words</span>
+            <button class="btn-report" id="downloadReportBtn" onclick="generateReport()">💾 Open Full Accuracy Report</button>
+        </div>
+    </div>
+
+
+    <script>
+        // --- Page Navigation Controls ---
+        function navigateToPage(pageId) {
+            document.querySelectorAll('.page-view').forEach(view => view.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Synchronize name inputs across views
+        function syncStudentName(val) {
+            document.getElementById('studentName').value = val;
+            document.getElementById('studentNameP2').value = val;
+            saveData('studentName', val);
+        }
+
+        // --- Page 1 Text Datasets & Dictionaries ---
+        const syllableDictionary = {
+            "project": ["proj", "ect"], "officer": ["of", "fi", "cer"], "harbour": ["har", "bour"],
+            "record": ["rec", "ord"], "hotline": ["hot", "line"], "message": ["mes", "sage"],
+            "english": ["eng", "lish"], "promotion": ["pro", "mo", "tion"], "easter": ["eas", "ter"],
+            "market": ["mar", "ket"], "marketing": ["mar", "ket", "ing"], "workshop": ["work", "shop"],
+            "situation": ["sit", "u", "a", "tion"], "benefits": ["ben", "e", "fits"], "joining": ["join", "ing"],
+            "event": ["e", "vent"], "special": ["spe", "cial"], "motivate": ["mo", "ti", "vate"], "target": ["tar", "get"]
+        };
+
+        const rawTextSituation1 = "You are a Project Officer at Harbour Mall. You need to record a hotline message in English about a new promotion: Easter Market.";
+        const rawTextSituation2 = "You are a Marketing Officer at Maker House. You need to record a hotline message in English about a new promotion: Toy-making Workshop.";
+
+        // --- Page 2 Vocabulary Datasets ---
+        const vocabularyData = [
+            { word: "activity", syllables: ["ac", "tiv", "i", "ty"], ch: "活動", cat: "Nouns / Noun phrases" },
+            { word: "business", syllables: ["busi", "ness"], ch: "商業/生意", cat: "Nouns / Noun phrases" },
+            { word: "crafting", syllables: ["craft", "ing"], ch: "手工藝製作", cat: "Nouns / Noun phrases" },
+            { word: "egg hunt", syllables: ["egg", " ", "hunt"], ch: "尋找復活節彩蛋活動", cat: "Nouns / Noun phrases" },
+            { word: "event", syllables: ["e", "vent"], ch: "活動/盛事", cat: "Nouns / Noun phrases" },
+            { word: "family", syllables: ["fam", "i", "ly"], ch: "家庭/家人", cat: "Nouns / Noun phrases" },
+            { word: "fee", syllables: ["fee"], ch: "費用", cat: "Nouns / Noun phrases" },
+            { word: "guidance", syllables: ["guid", "ance"], ch: "指導/引導", cat: "Nouns / Noun phrases" },
+            { word: "help desk", syllables: ["help", " ", "desk"], ch: "服務台/諮詢處", cat: "Nouns / Noun phrases" },
+            { word: "homepage", syllables: ["home", "page"], ch: "首頁", cat: "Nouns / Noun phrases" },
+            { word: "hop race", syllables: ["hop", " ", "race"], ch: "跳躍比賽", cat: "Nouns / Noun phrases" },
+            { word: "hour", syllables: ["hour"], ch: "小時", cat: "Nouns / Noun phrases" },
+            { word: "market", syllables: ["mar", "ket"], ch: "市場", cat: "Nouns / Noun phrases" },
+            { word: "member", syllables: ["mem", "ber"], ch: "會員/成員", cat: "Nouns / Noun phrases" },
+            { word: "music", syllables: ["mu", "sic"], ch: "音樂", cat: "Nouns / Noun phrases" },
+            { word: "office", syllables: ["of", "fice"], ch: "辦公室", cat: "Nouns / Noun phrases" },
+            { word: "opening", syllables: ["o", "pen", "ing"], ch: "開幕/開放時間", cat: "Nouns / Noun phrases" },
+            { word: "paper", syllables: ["pa", "per"], ch: "紙張", cat: "Nouns / Noun phrases" },
+            { word: "participant", syllables: ["par", "tic", "i", "pant"], ch: "參與者", cat: "Nouns / Noun phrases" },
+            { word: "performance", syllables: ["per", "form", "ance"], ch: "表演/表現", cat: "Nouns / Noun phrases" },
+            { word: "period", syllables: ["pe", "ri", "od"], ch: "期間/一段時間", cat: "Nouns / Noun phrases" },
+            { word: "person", syllables: ["per", "son"], ch: "人", cat: "Nouns / Noun phrases" },
+            { word: "promotion", syllables: ["pro", "mo", "tion"], ch: "推廣/促銷", cat: "Nouns / Noun phrases" },
+            { word: "session", syllables: ["ses", "sion"], ch: "環節/場次", cat: "Nouns / Noun phrases" },
+            { word: "shop", syllables: ["shop"], ch: "商店", cat: "Nouns / Noun phrases" },
+            { word: "skill", syllables: ["skill"], ch: "技能/技巧", cat: "Nouns / Noun phrases" },
+            { word: "surprise", syllables: ["sur", "prise"], ch: "驚喜", cat: "Nouns / Noun phrases" },
+            { word: "team", syllables: ["team"], ch: "團隊", cat: "Nouns / Noun phrases" },
+            { word: "toy", syllables: ["toy"], ch: "玩具", cat: "Nouns / Noun phrases" },
+            { word: "website", syllables: ["web", "site"], ch: "網站", cat: "Nouns / Noun phrases" },
+            { word: "week", syllables: ["week"], ch: "星期/周", cat: "Nouns / Noun phrases" },
+            { word: "workshop", syllables: ["work", "shop"], ch: "工作坊/研討會", cat: "Nouns / Noun phrases" },
+            
+            { word: "colourful", syllables: ["col", "our", "ful"], ch: "色彩繽紛的", cat: "Adjectives" },
+            { word: "creative", syllables: ["cre", "a", "tive"], ch: "有創意的", cat: "Adjectives" },
+            { word: "exciting", syllables: ["ex", "cit", "ing"], ch: "令人興奮的", cat: "Adjectives" },
+            { word: "festive", syllables: ["fes", "tive"], ch: "節日的/喜慶的", cat: "Adjectives" },
+            { word: "fun", syllables: ["fun"], ch: "有趣的", cat: "Adjectives" },
+            { word: "live", syllables: ["live"], ch: "現場的/直播的", cat: "Adjectives" },
+            { word: "special", syllables: ["spe", "cial"], ch: "特別的", cat: "Adjectives" },
+            { word: "step-by-step", syllables: ["step", "-", "by", "-", "step"], ch: "按部就班的/循序漸進的", cat: "Adjectives" },
+            { word: "upcoming", syllables: ["up", "com", "ing"], ch: "即將到來的", cat: "Adjectives" },
+            { word: "wooden", syllables: ["wood", "en"], ch: "木製的", cat: "Adjectives" },
+            
+            { word: "choose", syllables: ["choose"], ch: "選擇", cat: "Verbs / Phrasal verbs" },
+            { word: "click", syllables: ["click"], ch: "點擊", cat: "Verbs / Phrasal verbs" },
+            { word: "create", syllables: ["cre", "ate"], ch: "創造/製作", cat: "Verbs / Phrasal verbs" },
+            { word: "enjoy", syllables: ["en", "joy"], ch: "享受/喜歡", cat: "Verbs / Phrasal verbs" },
+            { word: "learn", syllables: ["learn"], ch: "學習", cat: "Verbs / Phrasal verbs" },
+            { word: "select", syllables: ["se", "lect"], ch: "挑選/選擇", cat: "Verbs / Phrasal verbs" },
+            { word: "view", syllables: ["view"], ch: "觀看/檢視", cat: "Verbs / Phrasal verbs" },
+            { word: "visit", syllables: ["vis", "it"], ch: "造訪/參觀", cat: "Verbs / Phrasal verbs" }
+        ];
+
+        const studentAttempts = {}; 
+        const starredWords = new Set();
+        let platformVoices = [];
+
+        // Globalized speech recognition allocation
+        const NativeSpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+        // --- Build Interactive Paragraph Components ---
+        function buildInteractiveParagraph(targetSelector, rawText) {
+            const container = document.getElementById(targetSelector);
+            container.innerHTML = "";
+            const tokens = rawText.split(" ");
+            
+            tokens.forEach((token) => {
+                const cleanWord = token.toLowerCase().replace(/[^a-zA-Z]/g, "");
+                if(!cleanWord) {
+                    container.appendChild(document.createTextNode(token + " "));
+                    return;
+                }
+
+                const wordWrapper = document.createElement("span");
+                wordWrapper.className = "clickable-word";
+                wordWrapper.appendChild(document.createTextNode(token + " "));
+                
+                const tooltipSpan = document.createElement("span");
+                tooltipSpan.className = "word-tooltip";
+                
+                const displayDiv = document.createElement("div");
+                displayDiv.className = "syl-display";
+                if (syllableDictionary[cleanWord]) {
+                    const parts = syllableDictionary[cleanWord];
+                    let combinedHTML = "";
+                    parts.forEach((part, idx) => {
+                        combinedHTML += `<span class="syl-part syl-c${idx % 4}">${part}</span>`;
+                        if (idx < parts.length - 1) combinedHTML += "•";
+                    });
+                    displayDiv.innerHTML = combinedHTML;
+                } else {
+                    displayDiv.textContent = cleanWord;
+                }
+                tooltipSpan.appendChild(displayDiv);
+
+                const micBtn = document.createElement("button");
+                micBtn.className = "btn-word-mic";
+                micBtn.innerHTML = "🎤 Verify My Voice";
+                micBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    executeWordSpeechCheck(cleanWord, wordWrapper, micBtn);
+                };
+                tooltipSpan.appendChild(micBtn);
+                wordWrapper.appendChild(tooltipSpan);
+                
+                wordWrapper.onclick = (e) => {
+                    e.stopPropagation();
+                    if (wordWrapper.classList.contains('active-syl')) {
+                        wordWrapper.classList.remove('active-syl');
+                    } else {
+                        document.querySelectorAll('.clickable-word').forEach(el => el.classList.remove('active-syl'));
+                        wordWrapper.classList.add('active-syl');
+                        triggerAudioPronounce(cleanWord);
+                    }
+                };
+                
+                container.appendChild(wordWrapper);
+            });
+        }
+
+        // TTS Pronunciation Utilities
+        function triggerAudioPronounce(word, explicitLangOption = null) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(word);
+                
+                if(explicitLangOption) {
+                    let targetLang = explicitLangOption.startsWith('us') ? 'en-US' : 'en-GB';
+                    utterance.lang = targetLang;
+                    utterance.rate = 0.85;
+
+                    const matchedVoice = platformVoices.find(voice => {
+                        const voiceName = voice.name.toLowerCase();
+                        const voiceLang = voice.lang.toLowerCase();
+                        if (!voiceLang.includes(targetLang.toLowerCase())) return false;
+                        
+                        if (explicitLangOption === 'uk-male') return (voiceName.includes('george') || voiceName.includes('daniel') || voiceName.includes('male')) && !voiceName.includes('female');
+                        if (explicitLangOption === 'uk-female') return voiceName.includes('hazel') || voiceName.includes('susan') || voiceName.includes('female');
+                        if (explicitLangOption === 'us-male') return (voiceName.includes('david') || voiceName.includes('male')) && !voiceName.includes('female');
+                        if (explicitLangOption === 'us-female') return voiceName.includes('zira') || voiceName.includes('samantha') || voiceName.includes('female');
+                        return false;
+                    });
+                    if (matchedVoice) utterance.voice = matchedVoice;
+                } else {
+                    utterance.lang = 'en-US';
+                    utterance.rate = 0.82;
+                }
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        // Inline Paragraph Speech Verification
+        function executeWordSpeechCheck(targetWord, elementWrapper, micButton) {
+            if (!NativeSpeechRecognition) {
+                alert("Speech recognition isn't supported in this browser. Use Chrome or Safari.");
+                return;
+            }
+
+            const recognition = new NativeSpeechRecognition();
+            recognition.lang = 'en-US';
+            recognition.interimResults = false;
+            
+            recognition.onstart = () => {
+                micButton.classList.add('recording');
+                micButton.textContent = "🛑 Speak now...";
+            };
+            recognition.onerror = () => {
+                micButton.classList.remove('recording');
+                micButton.textContent = "🎤 Try Again";
+            };
+            recognition.onend = () => micButton.classList.remove('recording');
+
+            recognition.onresult = (event) => {
+                const spokenText = event.results[0][0].transcript.toLowerCase().trim().replace(/[^a-zA-Z]/g, "");
+                micButton.classList.remove('recording');
+                
+                if (spokenText === targetWord || targetWord.includes(spokenText) || spokenText.includes(targetWord)) {
+                    elementWrapper.classList.remove('word-incorrect');
+                    elementWrapper.classList.add('word-correct');
+                    micButton.innerHTML = "✅ Correct!";
+                    micButton.style.background = "#16a34a";
+                } else {
+                    elementWrapper.classList.remove('word-correct');
+                    elementWrapper.classList.add('word-incorrect');
+                    micButton.innerHTML = "❌ Try Again";
+                    micButton.style.background = "#dc2626";
+                }
+                
+                setTimeout(() => {
+                    elementWrapper.classList.remove('active-syl');
+                    micButton.innerHTML = "🎤 Verify My Voice";
+                    micButton.style.background = "#4f46e5";
+                }, 1200);
+            };
+            recognition.start();
+        }
+
+        // --- Page 2 Speech Initialization & Rendering Logic ---
+        function initializePage2VocabularySuite() {
+            const container = document.getElementById('vocabList');
+            let currentCategory = "";
+
+            vocabularyData.forEach((item, index) => {
+                if (item.cat !== currentCategory) {
+                    currentCategory = item.cat;
+                    const heading = document.createElement('h2');
+                    heading.className = 'category-heading';
+                    heading.innerText = currentCategory;
+                    container.appendChild(heading);
+                }
+
+                const row = document.createElement('div');
+                row.className = 'word-row';
+                row.id = `row-${index}`;
+
+                let syllableHTML = '';
+                item.syllables.forEach((syl, sIdx) => {
+                    if (syl === " " || syl === "-") {
+                        syllableHTML += `<span>${syl}</span>`;
+                    } else {
+                        syllableHTML += `<span class="syl-p2-${sIdx % 4}">${syl}</span>`;
+                    }
+                });
+
+                row.innerHTML = `
+                    <div class="word-index">${index + 1}</div>
+                    <div class="star-container" id="star-${index}" onclick="toggleStar(${index}, '${item.word}')">★</div>
+                    <div class="word-main">
+                        <div class="word-text">${item.word}</div>
+                        <div class="syllable-hint" id="hint-${index}">${syllableHTML}</div>
+                        <div class="chinese-hint" id="chinese-${index}">${item.ch}</div>
+                        <div class="transcript-feedback" id="feedback-${index}"></div>
+                    </div>
+                    <div class="actions">
+                        <span class="status-badge" id="badge-${index}"></span>
+                        <button class="btn-listen" onclick="triggerAudioPronounce('${item.word}', document.getElementById('voiceAccent').value)">🔊 Listen</button>
+                        <button class="btn-hint" id="hint-btn-${index}" onclick="toggleHint(${index})">💡 Hint</button>
+                        <button class="btn-chinese" id="cn-btn-${index}" onclick="toggleChinese(${index})">文 A Chinese</button>
+                        <button class="btn-speak" id="speak-btn-${index}" onclick="verifySuitePronunciation(${index}, '${item.word}')">🎤 Speak</button>
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        function toggleStar(index, word) {
+            const starElem = document.getElementById(`star-${index}`);
+            if (starredWords.has(word)) {
+                starredWords.delete(word);
+                starElem.classList.remove('starred');
+            } else {
+                starredWords.add(word);
+                starElem.classList.add('starred');
+            }
+        }
+
+        function toggleChinese(index) {
+            const cnElem = document.getElementById(`chinese-${index}`);
+            const cnBtn = document.getElementById(`cn-btn-${index}`);
+            if (cnElem.style.display === 'block') {
+                cnElem.style.display = 'none';
+                cnBtn.classList.remove('active');
+            } else {
+                cnElem.style.display = 'block';
+                cnBtn.classList.add('active');
+            }
+        }
+
+        function toggleHint(index) {
+            const hintElem = document.getElementById(`hint-${index}`);
+            const hintBtn = document.getElementById(`hint-btn-${index}`);
+            if (hintElem.style.display === 'block') {
+                hintElem.style.display = 'none';
+                hintBtn.classList.remove('active');
+                hintBtn.innerHTML = "💡 Hint";
+            } else {
+                hintElem.style.display = 'block';
+                hintBtn.classList.add('active');
+                hintBtn.innerHTML = "❌ Hide Hint";
+            }
+        }
+
+        function verifySuitePronunciation(index, targetWord) {
+            if (!NativeSpeechRecognition) {
+                alert("Speech recognition engine not fully supported on this platform.");
+                return;
+            }
+
+            const speakBtn = document.getElementById(`speak-btn-${index}`);
+            const badge = document.getElementById(`badge-${index}`);
+            const feedback = document.getElementById(`feedback-${index}`);
+            
+            const recognitionSuite = new NativeSpeechRecognition();
+            recognitionSuite.lang = 'en-US';
+            recognitionSuite.continuous = false;
+
+            speakBtn.classList.add('recording');
+            speakBtn.innerHTML = "⏳ Listening...";
+            
+            recognitionSuite.onresult = function(event) {
+                const speechResult = event.results[0][0].transcript.toLowerCase().trim();
+                const cleanTarget = targetWord.toLowerCase().replace(/[^a-zA-Z0-9]/g, '').trim();
+                const cleanSpeech = speechResult.replace(/[^a-zA-Z0-9]/g, '').trim();
+
+                let isCorrect = (cleanSpeech === cleanTarget);
+                badge.className = "status-badge " + (isCorrect ? "correct" : "incorrect");
+                badge.textContent = isCorrect ? "✓ Correct" : "✗ Incorrect";
+                feedback.textContent = !isCorrect ? `Heard: "${speechResult}"` : "";
+
+                studentAttempts[targetWord] = { status: isCorrect ? "Correct" : "Incorrect", heard: speechResult };
+                updateProgress();
+            };
+
+            recognitionSuite.onspeechend = () => {
+                recognitionSuite.stop();
+                speakBtn.classList.remove('recording');
+                speakBtn.innerHTML = "🎤 Speak";
+            };
+
+            recognitionSuite.onerror = () => {
+                speakBtn.classList.remove('recording');
+                speakBtn.innerHTML = "🎤 Speak";
+                feedback.textContent = "Error capturing audio. Try again.";
+            };
+
+            recognitionSuite.start();
+        }
+
+        function updateProgress() {
+            const attemptedCount = Object.keys(studentAttempts).length;
+            document.getElementById('progressTracker').textContent = `Attempted: ${attemptedCount} / 50 words`;
+        }
+
+        // --- Native Logic Event Pass-Throughs ---
+        function autoGrow(element) {
+            element.style.height = "auto";
+            element.style.height = (element.scrollHeight) + "px";
+        }
+
+        function handleTyping(element) {
+            autoGrow(element);
+            saveData(element.id, element.value);
+        }
+
+        function saveData(key, value) {
+            localStorage.setItem(`LAN3109_${key}`, value);
+        }
+
+        function loadSavedData() {
+            const inputs = ['studentName', 's1_q1', 's1_q2', 's1_offer', 's2_q1', 's2_q2', 's2_offer'];
+            inputs.forEach(id => {
+                const savedValue = localStorage.getItem(`LAN3109_${id}`);
+                if (savedValue !== null) {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        el.value = savedValue;
+                        if(el.tagName === 'TEXTAREA') autoGrow(el);
+                    }
+                    if(id === 'studentName') {
+                        document.getElementById('studentNameP2').value = savedValue;
+                    }
+                }
+            });
+        }
+
+        function clearSituation(idPrefix) {
+            if (confirm(`Clear all typed responses for ${idPrefix === 's1' ? 'Situation 1' : 'Situation 2'}?`)) {
+                const inputs = [`${idPrefix}_q1`, `${idPrefix}_q2`, `${idPrefix}_offer`];
+                inputs.forEach(id => {
+                    document.getElementById(id).value = "";
+                    document.getElementById(id).style.height = "auto";
+                    localStorage.removeItem(`LAN3109_${id}`);
+                });
+            }
+        }
+
+        // Global dismiss for tooltips on void clicks
+        document.addEventListener('click', () => {
+            document.querySelectorAll('.clickable-word').forEach(el => el.classList.remove('active-syl'));
+        });
+
+        // --- Export Generation Functions ---
+        function exportToWorksheet() {
+            const name = document.getElementById("studentName").value.trim() || "Anonymous Student";
+            
+            const s1_q1 = document.getElementById("s1_q1").value.trim() || "__________________________________________________";
+            const s1_q2 = document.getElementById("s1_q2").value.trim() || "__________________________________________________";
+            const s1_off = document.getElementById("s1_offer").value.trim() || "__________________________________________________";
+            
+            const s2_q1 = document.getElementById("s2_q1").value.trim() || "__________________________________________________";
+            const s2_q2 = document.getElementById("s2_q2").value.trim() || "__________________________________________________";
+            const s2_off = document.getElementById("s2_offer").value.trim() || "__________________________________________________";
+
+            const printWindow = window.open('', '_blank', 'width=900,height=800');
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>LAN3109_Worksheet_${name.replace(/[^a-zA-Z0-9]/g, "_")}</title>
+                    <style>
+                        @page { margin: 15mm; size: a4 portrait; }
+                        body { font-family: Arial, sans-serif; color: #000000; margin: 0; padding: 0; font-size: 11pt; line-height: 1.5; }
+                        .header-row { display: flex; justify-content: space-between; border-bottom: 2px solid #000000; padding-bottom: 10px; margin-bottom: 25px; }
+                        .sit-block { margin-bottom: 35px; page-break-inside: avoid; }
+                        .title { font-weight: bold; font-size: 14pt; margin-bottom: 5px; }
+                        .desc { font-size: 11pt; margin-bottom: 15px; color: #222; }
+                        .box-frame { border: 2px solid #000000; width: 100%; }
+                        .row-frame { border-bottom: 2px solid #000000; padding: 15px; }
+                        .row-frame:last-child { border-bottom: none; }
+                        .label { font-weight: bold; font-style: italic; margin-bottom: 10px; font-size: 11pt; }
+                        .ans-line { margin: 8px 0; display: flex; align-items: flex-start; font-size: 11pt; }
+                        .bullet { font-size: 14pt; margin-right: 8px; line-height: 1; }
+                        .text-content { font-family: Courier, monospace; color: #000000; white-space: pre-wrap; word-break: break-word; }
+                    </style>
+                </head>
+                <body>
+                    <div class="header-row">
+                        <div><strong>LAN3109 Revision Task Sheet</strong></div>
+                        <div><strong>Student Name:</strong> ${name}</div>
+                    </div>
+                    <div class="sit-block">
+                        <div class="title">Situation 1</div>
+                        <div class="desc">${rawTextSituation1}</div>
+                        <div class="box-frame">
+                            <div class="row-frame">
+                                <div class="label">Why join?*</div>
+                                <div class="ans-line"><span class="bullet">•</span><span class="text-content">${s1_q1}</span></div>
+                                <div class="ans-line"><span class="bullet">•</span><span class="text-content">${s1_q2}</span></div>
+                            </div>
+                            <div class="row-frame">
+                                <div class="label">Special offer:</div>
+                                <div class="ans-line"><span class="text-content">${s1_off}</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="sit-block">
+                        <div class="title">Situation 2</div>
+                        <div class="desc">${rawTextSituation2}</div>
+                        <div class="box-frame">
+                            <div class="row-frame">
+                                <div class="label">Why join?*</div>
+                                <div class="ans-line"><span class="bullet">•</span><span class="text-content">${s2_q1}</span></div>
+                                <div class="ans-line"><span class="bullet">•</span><span class="text-content">${s2_q2}</span></div>
+                            </div>
+                            <div class="row-frame">
+                                <div class="label">Special offer:</div>
+                                <div class="ans-line"><span class="text-content">${s2_off}</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    <script>
+                        window.onload = function() { window.print(); setTimeout(function() { window.close(); }, 500); };
+                    <\/script>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+        }
+
+        function generateReport() {
+            const studentName = document.getElementById('studentName').value.trim() || "Anonymous Student";
+            const attemptedCount = Object.keys(studentAttempts).length;
+            let correctCount = 0;
+            let tableRowsHTML = "";
+
+            vocabularyData.forEach((item, index) => {
+                const record = studentAttempts[item.word];
+                const status = record ? record.status : "Not Attempted";
+                const heardText = (record && record.heard) ? `"${record.heard}"` : "-";
+                const isStarred = starredWords.has(item.word) ? '★' : '-';
+                
+                let statusColor = "#64748b";
+                if (status === "Correct") {
+                    correctCount++;
+                    statusColor = "#059669";
+                } else if (status === "Incorrect") {
+                    statusColor = "#dc2626";
+                }
+
+                tableRowsHTML += `
+                    <tr>
+                        <td style="padding: 7px; border: 1px solid #cbd5e1; text-align: center;">${index + 1}</td>
+                        <td style="padding: 7px; border: 1px solid #cbd5e1; text-align: center; color: #f59e0b; font-weight: bold;">${isStarred}</td>
+                        <td style="padding: 7px; border: 1px solid #cbd5e1;"><strong>${item.word}</strong></td>
+                        <td style="padding: 7px; border: 1px solid #cbd5e1;">${item.ch}</td>
+                        <td style="padding: 7px; border: 1px solid #cbd5e1; font-size: 11px; color: #475569;">${item.cat}</td>
+                        <td style="padding: 7px; border: 1px solid #cbd5e1; font-weight: bold; color: ${statusColor};">${status}</td>
+                        <td style="padding: 7px; border: 1px solid #cbd5e1; font-style: italic; color: #334155;">${heardText}</td>
+                    </tr>
+                `;
+            });
+
+            const scorePercentage = attemptedCount > 0 ? Math.round((correctCount / vocabularyData.length) * 100) : 0;
+            const printWindow = window.open('', '_blank', 'width=900,height=800');
+            
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>${studentName.replace(/[^a-zA-Z0-9]/g, "_")}_Pronunciation_Report</title>
+                    <style>
+                        @page { margin: 12mm; }
+                        body { font-family: Arial, sans-serif; color: #0f172a; margin: 0; padding: 0; }
+                        .header { border-bottom: 3px solid #4f46e5; padding-bottom: 5px; text-align: center; }
+                        .header h2 { margin: 0; font-size: 22px; color: #1e1b4b; }
+                        .header p { margin: 4px 0 0 0; font-size: 11px; color: #475569; }
+                        .meta-box { display: flex; justify-content: space-between; margin: 15px 0; background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0; font-size: 13px; }
+                        .meta-box p { margin: 3px 0; }
+                        table { width: 100%; border-collapse: collapse; margin-top: 5px; font-size: 11px; }
+                        th { background-color: #312e81; color: white; padding: 8px; text-align: left; }
+                        tr { page-break-inside: avoid; }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <h2>LAN3109 Pronunciation Practice Report</h2>
+                        <p>Generated: ${new Date().toLocaleDateString()} @ ${new Date().toLocaleTimeString()}</p>
+                    </div>
+                    <div class="meta-box">
+                        <div>
+                            <p><strong>Student Name:</strong> ${studentName}</p>
+                            <p><strong>Total Vocabulary Targets:</strong> 50</p>
+                        </div>
+                        <div>
+                            <p><strong>Attempt Counter:</strong> ${attemptedCount} / 50</p>
+                            <p><strong>Total Accuracy Metric:</strong> ${correctCount} Correct (${scorePercentage}%)</p>
+                        </div>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 5%; text-align: center;">No.</th>
+                                <th style="width: 7%; text-align: center;">Review</th>
+                                <th style="width: 20%;">Target Word</th>
+                                <th style="width: 23%;">Chinese Meaning</th>
+                                <th style="width: 18%;">Category</th>
+                                <th style="width: 12%;">Status</th>
+                                <th style="width: 15%;">Captured Voice</th>
+                            </tr>
+                        </thead>
+                        <tbody>${tableRowsHTML}</tbody>
+                    </table>
+                    <script>
+                        window.onload = function() { window.print(); setTimeout(function() { window.close(); }, 500); };
+                    <\/script>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+        }
+
+        // Initial setup on window execution
+        window.addEventListener('DOMContentLoaded', () => {
+            buildInteractiveParagraph("desc1", rawTextSituation1);
+            buildInteractiveParagraph("desc2", rawTextSituation2);
+            initializePage2VocabularySuite();
+            loadSavedData();
+            
+            if ('speechSynthesis' in window) {
+                platformVoices = window.speechSynthesis.getVoices();
+                if (window.speechSynthesis.onvoiceschanged !== undefined) {
+                    window.speechSynthesis.onvoiceschanged = () => {
+                        platformVoices = window.speechSynthesis.getVoices();
+                    };
+                }
+            }
+        });
+    </script>
+</body>
+</html>
