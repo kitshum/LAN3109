@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LAN3109F Revision Hub</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-dark: #3730a3;
+            --primary-gradient: linear-gradient(135deg, #1e1b4b 0%, #4f46e5 100%);
+            --bg-gradient: linear-gradient(135deg, #e0e7ff 0%, #f8fafc 50%, #f1f5f9 100%);
+            --card-bg: #ffffff;
+            --text: #0f172a;
+            --text-muted: #475569;
+            --border: #22c55e; /* Green box border color matching image */
+            
+            /* Syllable Colors */
+            --syl1: #38bdf8;
+            --syl2: #f472b6;
+            --syl3: #4ade80;
+            --syl4: #fbbf24;
+
+            /* Page 2 Exclusive styling tokens */
+            --p2-success: #059669;
+            --p2-success-light: #ecfdf5;
+            --p2-danger: #dc2626;
+            --p2-danger-light: #fef2f2;
+            --p2-warning-light: #fffbeb;
+            --p2-border-light: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            background-attachment: fixed;
+            color: var(--text);
+            padding: 40px 20px 120px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* --- SPA View Navigation Wrapper --- */
+        .page-view {
+            display: none;
+            width: 100%;
+            max-width: 950px;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .page-view.active {
+            display: flex;
+        }
+
+        /* --- HEADER ELEMENTS --- */
+        .vtc-header {
+            width: 100%;
+            text-align: center;
+            margin-bottom: 25px;
+            color: #475569;
+        }
+
+        .vtc-institution {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #475569;
+            margin-bottom: 2px;
+        }
+
+        .vtc-programme {
+            font-size: 1.15rem;
+            font-weight: bold;
+            color: #64748b;
+            margin-bottom: 12px;
+        }
+
+        .vtc-module {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #000000;
+            margin-bottom: 6px;
+        }
+
+        .vtc-assignment {
+            font-size: 1.35rem;
+            font-weight: normal; /* Unbolded as requested */
+            color: #000000;
+            margin-bottom: 6px;
+        }
+
+        .vtc-title {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #000000;
+            text-decoration: none;
+            margin-top: 5px;
+        }
+
+        /* Custom alignment rules for page 2 */
+        .p2-vtc-header {
+            width: 100%;
+            margin-bottom: 30px;
+        }
+        .p2-vtc-center-group {
+            text-align: center;
+            color: #475569;
+            margin-bottom: 20px;
+        }
+        .p2-vtc-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #000000;
+            text-align: left;
+            margin-top: 10px;
+        }
+
+        .vtc-instructions-box {
+            width: 100%;
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #1e293b;
+            border-left: 5px solid var(--primary);
+        }
+
+        .vtc-instructions-box ol {
+            margin-top: 8px;
+            margin-left: 24px;
+        }
+
+        .meta-container {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        }
+
+        .student-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .student-meta input {
+            padding: 10px 16px;
+            border: 2px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 1rem;
+            width: 280px;
+            outline: none;
+            background-color: white;
+            transition: all 0.2s;
+        }
+        .student-meta input:focus { 
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(165, 180, 252, 0.4);
+        }
+
+        .p2-setup-box {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: flex-start;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
+            width: 100%;
+        }
+        
+        .p2-meta-fields {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            width: 100%;
+        }
+        
+        .p2-setup-box input {
+            padding: 10px 16px;
+            border: 2px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 1rem;
+            width: 280px;
+            outline: none;
+        }
+
+        .instruction-tag {
+            font-size: 0.95rem;
+            color: #1e3a8a;
+            font-weight: 500;
+            background: #eff6ff;
+            padding: 10px 20px;
+            border-radius: 30px;
+            border: 1px solid #bfdbfe;
+            line-height: 1.4;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .situation-card {
+            width: 100%;
+            margin-bottom: 40px;
+            background: transparent;
+        }
+
+        .sit-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #000000;
+            margin-bottom: 12px;
+        }
+
+        .sit-desc {
+            font-size: 1.15rem;
+            line-height: 1.7;
+            margin-bottom: 18px;
+            color: #000000;
+        }
+
+        /* --- Replicated Green Card Box System --- */
+        .green-content-box {
+            border: 2px solid var(--border);
+            background: #ffffff;
+            width: 100%;
+            border-radius: 14px;
+            padding: 25px 35px;
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.04);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .green-box-title {
+            font-size: 1.45rem;
+            font-weight: 800;
+            color: #000000;
+            text-align: center;
+            margin-bottom: 5px;
+        }
+
+        .green-box-subheading {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #000000;
+        }
+
+        .green-box-row {
+            display: flex;
+            align-items: center;
+            font-size: 1.1rem;
+            color: #000000;
+            gap: 8px;
+        }
+
+        .diamond-bullet {
+            color: #000000;
+            font-size: 0.9rem;
+            margin-right: 4px;
+        }
+
+        .aim-box-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-left: 8px;
+        }
+
+        .aim-arrow {
+            font-size: 1.45rem; /* Enlarged to visually balance with font scale */
+            font-weight: bold;
+            color: #000000;
+        }
+
+        .aim-container {
+            border: 1px solid #000000;
+            padding: 4px 12px;
+            display: inline-block;
+            background: #ffffff;
+        }
+
+        /* --- Interactive Word Engine Styling --- */
+        .clickable-word {
+            position: relative;
+            cursor: pointer;
+            padding: 0 2px;
+            border-radius: 4px;
+            transition: all 0.2s;
+            display: inline-block;
+            font-weight: inherit;
+        }
+        .clickable-word:hover {
+            background-color: #cbd5e1;
+        }
+
+        .word-tooltip {
+            position: absolute;
+            bottom: 130%;
+            left: 50%;
+            transform: translateX(-50%) scale(0.9);
+            background: #1e1b4b;
+            color: white;
+            padding: 10px 14px;
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 99;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        .word-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 6px;
+            border-style: solid;
+            border-color: #1e1b4b transparent transparent transparent;
+        }
+        .clickable-word.active-syl .word-tooltip {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateX(-50%) scale(1);
+        }
+
+        .syl-display {
+            font-size: 1.25rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            white-space: nowrap;
+        }
+
+        .syl-part { padding: 0 1px; }
+        .syl-c0 { color: var(--syl1); }
+        .syl-c1 { color: var(--syl2); }
+        .syl-c2 { color: var(--syl3); }
+        .syl-c3 { color: var(--syl4); }
+
+        .silent {
+            opacity: 0.45;
+            font-style: italic;
+            position: relative;
+        }
+        .silent::after {
+            content: ".";
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.8rem;
+            line-height: 0;
+            opacity: 0.5;
+        }
+
+        .btn-word-mic {
+            background: #4f46e5;
+            color: white;
+            border: none;
+            padding: 4px 10px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            border-radius: 4px;
+            cursor: pointer;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: background 0.2s;
+        }
+        .btn-word-mic:hover { background: #6366f1; }
+        .btn-word-mic.recording { background: #dc2626; }
+
+        .word-correct {
+            color: #16a34a !important;
+            text-shadow: 0 0 8px rgba(22, 163, 74, 0.2);
+        }
+        .word-incorrect {
+            color: #dc2626 !important;
+            text-decoration: underline wavy #ef4444;
+        }
+
+        /* --- FLOATING TRANSITION SHORTCUT --- */
+        .nav-floating-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 16px 28px;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 700;
+            box-shadow: 0 10px 25px rgba(79, 70, 229, 0.35);
+            border: none;
+            cursor: pointer;
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .nav-floating-btn:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 14px 30px rgba(79, 70, 229, 0.45);
+        }
+
+        /* --- PAGE 2 SUITE STYLING --- */
+        .list-container {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            margin-bottom: 110px;
+        }
+
+        .category-heading {
+            font-size: 1.45rem;
+            font-weight: 700;
+            color: #1e1b4b;
+            margin: 35px 0 12px 5px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .category-heading::before {
+            content: '';
+            display: inline-block;
+            width: 6px;
+            height: 24px;
+            background-color: var(--primary);
+            border-radius: 4px;
+        }
+
+        .word-row {
+            background: var(--card-bg);
+            border: 1px solid var(--p2-border-light);
+            border-radius: 14px;
+            padding: 20px 24px;
+            display: grid;
+            grid-template-columns: 45px auto 1fr auto;
+            align-items: center;
+            gap: 20px;
+            transition: all 0.2s;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+            width: 100%;
+        }
+
+        .word-row:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+            border-color: #cbd5e1;
+        }
+
+        .word-index {
+            font-weight: 700;
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            background: #f1f5f9;
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .star-container {
+            cursor: pointer;
+            font-size: 1.6rem;
+            color: #cbd5e1;
+            user-select: none;
+        }
+        .star-container.starred { color: #f59e0b; }
+
+        .word-main {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            cursor: pointer;
+        }
+
+        .word-text-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .word-text {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+        
+        .click-audio-badge {
+            font-size: 0.75rem;
+            color: #64748b;
+            background: #f1f5f9;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .syllable-hint, .chinese-hint, .example-sentence-hint {
+            font-size: 1.05rem;
+            font-weight: 600;
+            display: none;
+            padding: 8px 14px;
+            border-radius: 8px;
+            width: fit-content;
+            margin-top: 4px;
+        }
+
+        .syllable-hint { border-left: 4px solid #eab308; background: #f8fafc; letter-spacing: 1px; }
+        .chinese-hint { color: #047857; background: #f0fdf4; border-left: 4px solid #10b981; }
+        .example-sentence-hint { color: #1e1b4b; background: #f5f3ff; border-left: 4px solid #8b5cf6; font-weight: 500; font-style: italic; }
+
+        .syl-p2-0 { color: #2563eb; }
+        .syl-p2-1 { color: #db2777; }
+        .syl-p2-2 { color: #059669; }
+        .syl-p2-3 { color: #b45309; }
+
+        .actions { display: flex; gap: 10px; align-items: center; }
+        .actions button { padding: 10px 16px; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 0.9rem; }
+
+        .btn-hint { background-color: var(--p2-warning-light); color: #92400e; }
+        .btn-hint.active { background-color: #92400e; color: white; }
+        .btn-example { background-color: #f5f3ff; color: #5b21b6; border: 1px solid #ddd6fe; }
+        .btn-example.active { background-color: #5b21b6; color: white; }
+        .btn-speak { background-color: #f1f5f9; color: #475569; border: 1px solid var(--p2-border-light); }
+        .btn-speak.recording { background-color: var(--p2-danger); color: white; border-color: var(--p2-danger); }
+
+        .status-badge { padding: 8px 14px; border-radius: 8px; font-size: 0.9rem; font-weight: 700; display: none; }
+        .status-badge.correct { background-color: var(--p2-success-light); color: var(--p2-success); display: inline-block; }
+        .status-badge.incorrect { background-color: var(--p2-danger-light); color: var(--p2-danger); display: inline-block; }
+
+        .transcript-feedback { font-size: 0.85rem; color: var(--p2-danger); margin-top: 4px; }
+
+        .p2-footer-action-bar {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(12px);
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            z-index: 500;
+            border-top: 1px solid var(--p2-border-light);
+        }
+
+        .btn-report { background: linear-gradient(135deg, var(--p2-success) 0%, #047857 100%); color: white; padding: 14px 30px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; }
+        .progress-text { font-weight: 700; color: #1e293b; font-size: 1.1rem; background: #e2e2e2; padding: 8px 20px; border-radius: 30px; }
+        .btn-to-tasks { background-color: #64748b; color: white; padding: 12px 22px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <!-- ================= PAGE 1 VIEW (Task Sheet Content Replicated) ================= -->
+    <div id="page1" class="page-view active">
+        
+        <div class="vtc-header">
+            <div class="vtc-institution">Vocational Training Council</div>
+            <div class="vtc-programme">Diploma of Foundation Studies</div>
+            <div class="vtc-module">Vocational English IV: Oral Presentation (LAN3109F)</div>
+            <div class="vtc-assignment">Test (2025-2026)</div>
+            <div class="vtc-title">Revision Task Sheet</div>
+        </div>
+
+        <div class="vtc-instructions-box">
+            In this assessment, you are required to organise and deliver an oral presentation of a proposal based on one of the following situations. To better prepare for the assessment, you should:
+            <ol>
+                <li>read the situations and the background information of the proposals carefully; and</li>
+                <li>revise the vocabulary list on p.2.</li>
+            </ol>
+        </div>
+
+        <div class="meta-container">
+            <div class="student-meta">
+                <label for="studentName"><strong>Student Name:</strong></label>
+                <input type="text" id="studentName" placeholder="Type full name..." oninput="syncStudentName(this.value)">
+            </div>
+            <div class="instruction-tag">
+                🗣️ Click any context word below to listen to and practise its pronunciation.
+            </div>
+        </div>
+
+        <!-- SITUATION 1 DYNAMIC BLOCK -->
+        <div class="situation-card">
+            <h2 class="sit-title">Situation 1</h2>
+            <p class="sit-desc" id="s1_sit_para"></p>
+            
+            <!-- Green Box Replication -->
+            <div class="green-content-box">
+                <div class="green-box-title" id="s1_box_title"></div>
+                <div class="green-box-subheading" id="s1_box_sub"></div>
+                
+                <div class="green-box-row">
+                    <span class="diamond-bullet">♦</span>
+                    <span id="s1_box_b1"></span>
+                </div>
+                <div class="green-box-row">
+                    <span class="diamond-bullet">♦</span>
+                    <span id="s1_box_b2"></span>
+                    <div class="aim-box-wrapper">
+                        <span class="aim-arrow">←</span>
+                        <div class="aim-container" id="s1_box_aim"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SITUATION 2 DYNAMIC BLOCK -->
+        <div class="situation-card">
+            <h2 class="sit-title">Situation 2</h2>
+            <p class="sit-desc" id="s2_sit_para"></p>
+            
+            <!-- Green Box Replication -->
+            <div class="green-content-box">
+                <div class="green-box-title" id="s2_box_title"></div>
+                <div class="green-box-subheading" id="s2_box_sub"></div>
+                
+                <div class="green-box-row">
+                    <span class="diamond-bullet">♦</span>
+                    <span id="s2_box_b1"></span>
+                </div>
+                <div class="green-box-row">
+                    <span class="diamond-bullet">♦</span>
+                    <span id="s2_box_b2"></span>
+                    <div class="aim-box-wrapper">
+                        <span class="aim-arrow">←</span>
+                        <div class="aim-container" id="s2_box_aim"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button class="nav-floating-btn" onclick="navigateToPage('page2')">
+            Go to Vocabulary List (p.2) ➔
+        </button>
+    </div>
+
+
+    <!-- ================= PAGE 2 VIEW (Pronunciation Suite) ================= -->
+    <div id="page2" class="page-view">
+        <div class="p2-vtc-header">
+            <div class="p2-vtc-center-group">
+                <div class="vtc-institution">Vocational Training Council</div>
+                <div class="vtc-programme">Diploma of Foundation Studies</div>
+            </div>
+            <div class="p2-vtc-title">Vocabulary List</div>
+        </div>
+
+        <div class="p2-setup-box">
+            <div class="p2-meta-fields">
+                <label for="studentNameP2"><strong>Student Name:</strong></label>
+                <input type="text" id="studentNameP2" placeholder="Type full name..." readonly>
+            </div>
+            <div class="instruction-tag" style="font-weight: 600;">
+                💡 <strong>Instructions:</strong> Click any word block to listen to its pronunciation and learn its Chinese meaning. You can also star (★) difficult words to prioritise and deepen your revision.
+            </div>
+        </div>
+
+        <div class="list-container" id="vocabList"></div>
+
+        <div class="p2-footer-action-bar">
+            <button class="btn-to-tasks" onclick="navigateToPage('page1')">⬅ Return to Tasks</button>
+            <span class="progress-text" id="progressTracker">Attempted: 0 / 50 words</span>
+            <button class="btn-report" id="downloadReportBtn" onclick="generateReport()">💾 Open Full Accuracy Report</button>
+        </div>
+    </div>
+
+
+    <!-- ================= JAVASCRIPT MASTER ENGINE ================= -->
+    <script>
+        function navigateToPage(pageId) {
+            document.querySelectorAll('.page-view').forEach(view => view.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function syncStudentName(val) {
+            document.getElementById('studentName').value = val;
+            document.getElementById('studentNameP2').value = val;
+            localStorage.setItem(`LAN3109_studentName`, val);
+        }
+
+        const syllableDictionary = {
+            "promotion": ["pro", "mo", "tion"], "wonderland": ["won", "der", "land"], "decreasing": ["de", "creas", "ing"],
+            "visitors": ["vis", "i", "tors"], "presentation": ["pres", "en", "ta", "tion"], "proposal": ["pro", "pos", "al"],
+            "monthly": ["month", "ly"], "meeting": ["meet", "ing"], "evergreen": ["ev", "er", "green"],
+            "increasing": ["in", "creas", "ing"], "activities": ["ac", "tiv", "i", "ties"], "attract": ["at", "tract"],
+            "wonderfun": ["won", "der", "fun"], "background": ["back", "ground"], "promote": ["pro", "mote"],
+            "well-being": ["well", "be", "ing"]
+        };
+
+        const s1_data = {
+            situation: "You work in the Promotion Team of Happy Wonderland. Your team is planning to solve the problem of decreasing number of visitors. You need to give a presentation of the proposal in the monthly meeting.",
+            title: "Summer WonderFun",
+            subheading: "Proposal:",
+            bullet1: "Background: ↓ number of visitors over last six months",
+            bullet2: "Proposal: Summer WonderFun",
+            aim: "Aim: attract more visitors"
+        };
+
+        const s2_data = {
+            situation: "You work in the Social Service Section of Evergreen Youth Centre. Your centre is planning to solve the problem of increasing need for youth activities. You need to give a presentation of the proposal in the monthly meeting.",
+            title: "Summer Get Set Go!",
+            subheading: "Proposal:",
+            bullet1: "Background: ↑ demand for youth activities in recent years",
+            bullet2: "Proposal: Summer Get Set Go!",
+            aim: "Aim: promote youth well-being"
+        };
+
+        const vocabularyData = [
+            { word: "area", syllables: ["ar", "e", "a"], ch: "區域 / 地區", cat: "Nouns/Noun phrases", sentence: "This area of the park is closed for maintenance." },
+            { word: "appeal", syllables: ["ap", "peal"], ch: "吸引力 / 呼籲", cat: "Nouns/Noun phrases", sentence: "The new theme park has a lot of appeal for young people." },
+            { word: "approval", syllables: ["ap", "prov", "al"], ch: "批准 / 同意", cat: "Nouns/Noun phrases", sentence: "We need management approval before starting the project." },
+            { word: "attraction", syllables: ["at", "trac", "tion"], ch: "景點 / 吸引物", cat: "Nouns/Noun phrases", sentence: "The roller coaster is the main attraction here." },
+            { word: "battle", syllables: ["bat", "tle"], ch: "戰鬥 / 競賽", cat: "Nouns/Noun phrases", sentence: "The two teams had a close battle in the finals." },
+            { word: "benefit", syllables: ["ben", "e", "fit"], ch: "利益 / 好處", cat: "Nouns/Noun phrases", sentence: "Regular exercise has many physical benefits." },
+            { word: "budget", syllables: ["budg", "et"], ch: "預算", cat: "Nouns/Noun phrases", sentence: "We must stay within our marketing budget." },
+            { word: "conference", syllables: ["con", "fer", "ence"], ch: "會議 / 研討會", cat: "Nouns/Noun phrases", sentence: "The annual staff conference is held in October." },
+            { word: "enjoyment", syllables: ["en", "joy", "ment"], ch: "享受 / 樂趣", cat: "Nouns/Noun phrases", sentence: "Our goal is to provide maximum enjoyment for visitors." },
+            { word: "feedback", syllables: ["feed", "back"], ch: "反饋 / 意見", cat: "Nouns/Noun phrases", sentence: "We welcome constructive feedback from our customers." },
+            { word: "frontline", syllables: ["front", "line"], ch: "前線", cat: "Nouns/Noun phrases", sentence: "Frontline staff are vital for great customer service." },
+            { word: "guideline", syllables: ["guide", "line"], ch: "指導方針", cat: "Nouns/Noun phrases", sentence: "Please follow the safety guidelines carefully." },
+            { word: "handling", syllables: ["hand", "ling"], ch: "處理 / 搬運", cat: "Nouns/Noun phrases", sentence: "Proper handling of complaints is very important." },
+            { word: "hour", syllables: ["<span class='silent'>h</span>our"], ch: "小時", cat: "Nouns/Noun phrases", sentence: "The presentation lasted for one hour." },
+            { word: "issue", syllables: ["is", "sue"], ch: "問題 / 議題", cat: "Nouns/Noun phrases", sentence: "Let's discuss the budget issue tomorrow." },
+            { word: "leadership", syllables: ["lead", "er", "ship"], ch: "領導能力", cat: "Nouns/Noun phrases", sentence: "She showed excellent leadership during the project." },
+            { word: "live show", syllables: ["live", " ", "show"], ch: "現場表演", cat: "Nouns/Noun phrases", sentence: "The evening concludes with an amazing live show." },
+            { word: "management", syllables: ["man", "age", "ment"], ch: "管理層 / 管理", cat: "Nouns/Noun phrases", sentence: "The proposal has been submitted to management." },
+            { word: "participant", syllables: ["par", "tic", "i", "pant"], ch: "參與者", cat: "Nouns/Noun phrases", sentence: "Each participant will receive a certificate." },
+            { word: "participation", syllables: ["par", "tic", "i", "pa", "tion"], ch: "參與 / 分享", cat: "Nouns/Noun phrases", sentence: "We encourage full participation from the audience." },
+            { word: "pass-holder", syllables: ["pass", "-", "hold", "er"], ch: "持票人 / 持卡人", cat: "Nouns/Noun phrases", sentence: "Annual pass-holders enjoy a special discount." },
+            { word: "performer", syllables: ["per", "form", "er"], ch: "表演者", cat: "Nouns/Noun phrases", sentence: "The street performers attracted a massive crowd." },
+            { word: "platform", syllables: ["plat", "form"], ch: "平台", cat: "Nouns/Noun phrases", sentence: "Social media is an effective marketing platform." },
+            { word: "programme", syllables: ["pro", "gramme"], ch: "節目 / 計劃", cat: "Nouns/Noun phrases", sentence: "The summer activity programme looks fantastic." },
+            { word: "profit", syllables: ["prof", "it"], ch: "利潤 / 收益", cat: "Nouns/Noun phrases", sentence: "The new strategy generated a high profit." },
+            { word: "rating", syllables: ["rat", "ing"], ch: "評分 / 等級", cat: "Nouns/Noun phrases", sentence: "The center received a five-star user rating." },
+            { word: "review", syllables: ["re", "view"], ch: "評論 / 複習", cat: "Nouns/Noun phrases", sentence: "Online reviews help us adjust our services." },
+            { word: "ride", syllables: ["ride"], ch: "遊樂設施 / 騎乘", cat: "Nouns/Noun phrases", sentence: "The park's newest ride is extremely thrilling." },
+            { word: "section", syllables: ["sec", "tion"], ch: "部門 / 部分", cat: "Nouns/Noun phrases", sentence: "He works in the youth service section." },
+            { word: "stall", syllables: ["stall"], ch: "攤位", cat: "Nouns/Noun phrases", sentence: "We will set up a game stall at the carnival." },
+            { word: "surprise", syllables: ["sur", "prise"], ch: "驚喜", cat: "Nouns/Noun phrases", sentence: "The team prepared a wonderful surprise event." },
+            { word: "teen", syllables: ["teen"], ch: "青少年", cat: "Nouns/Noun phrases", sentence: "The workshop focuses on teen development." },
+            { word: "tour", syllables: ["tour"], ch: "導覽 / 旅遊", cat: "Nouns/Noun phrases", sentence: "We took a guided tour of the facility." },
+            { word: "waiting time", syllables: ["wait", "ing", " ", "time"], ch: "輪候時間", cat: "Nouns/Noun phrases", sentence: "We need to reduce the waiting time for the rides." },
+            { word: "workplace", syllables: ["work", "place"], ch: "工作場所", cat: "Nouns/Noun phrases", sentence: "Communication is key in a modern workplace." },
+            { word: "zone", syllables: ["zone"], ch: "區域 / 範圍", cat: "Nouns/Noun phrases", sentence: "The center includes a quiet study zone." },
+            { word: "additional", syllables: ["ad", "di", "tion", "al"], ch: "額外的", cat: "Adjectives", sentence: "We require additional resources for this project." },
+            { word: "annual", syllables: ["an", "nu", "al"], ch: "每年的 / 年度的", cat: "Adjectives", sentence: "The annual general meeting is next Friday." },
+            { word: "available", syllables: ["a", "vail", "a", "ble"], ch: "可用的 / 可得到的", cat: "Adjectives", sentence: "Are there any slots available for tomorrow?" },
+            { word: "early", syllables: ["ear", "ly"], ch: "早的 / 早期的", cat: "Adjectives", sentence: "An early registration guarantees a seat." },
+            { word: "engaging", syllables: ["en", "gag", "ing"], ch: "引人入勝的 / 有吸引力的", cat: "Adjectives", sentence: "The speaker gave an engaging presentation." },
+            { word: "exciting", syllables: ["ex", "cit", "ing"], ch: "令人興奮的", cat: "Adjectives", sentence: "The team has an exciting proposal for the event." },
+            { word: "insufficient", syllables: ["in", "suf", "fi", "cient"], ch: "不足的 / 不夠的", cat: "Adjectives", sentence: "The existing spaces are insufficient for our needs." },
+            { word: "magical", syllables: ["mag", "i", "cal"], ch: "魔幻的 / 奇妙的", cat: "Adjectives", sentence: "The winter display created a magical atmosphere." },
+            { word: "meaningful", syllables: ["mean", "ing", "ful"], ch: "有意義的", cat: "Adjectives", sentence: "Volunteering is a meaningful way to spend summer." },
+            { word: "on-site", syllables: ["on", "-", "site"], ch: "現場的 / 在地的", cat: "Adjectives", sentence: "We provide on-site technical support during the seminar." },
+            { word: "repeated", syllables: ["re", "peat", "ed"], ch: "重複的 / 反覆的", cat: "Adjectives", sentence: "We received repeated requests for more workshops." },
+            { word: "short-term", syllables: ["short", "-", "term"], ch: "短期的", cat: "Adjectives", sentence: "This short-term solution fixes the issue temporarily." },
+            { word: "technical", syllables: ["tech", "ni", "cal"], ch: "技術性的 / 專門的", cat: "Adjectives", sentence: "The staff resolved the technical problems quickly." },
+            { word: "enough", syllables: ["e", "nough"], ch: "足夠的", cat: "Determiner", sentence: "Do we have enough promotional materials?" }
+        ];
+
+        const studentAttempts = {}; 
+        const starredWords = new Set();
+        const NativeSpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+        function buildInteractiveParagraph(targetSelector, rawText) {
+            const container = document.getElementById(targetSelector);
+            if (!container) return;
+            container.innerHTML = "";
+            const tokens = rawText.split(" ");
+            
+            tokens.forEach((token) => {
+                const cleanWord = token.toLowerCase().replace(/[^a-zA-Z-]/g, "");
+                if(!cleanWord) {
+                    container.appendChild(document.createTextNode(token + " "));
+                    return;
+                }
+
+                const wordWrapper = document.createElement("span");
+                wordWrapper.className = "clickable-word";
+                wordWrapper.appendChild(document.createTextNode(token + " "));
+                
+                const tooltipSpan = document.createElement("span");
+                tooltipSpan.className = "word-tooltip";
+                
+                const displayDiv = document.createElement("div");
+                displayDiv.className = "syl-display";
+                if (syllableDictionary[cleanWord]) {
+                    const parts = syllableDictionary[cleanWord];
+                    let combinedHTML = "";
+                    parts.forEach((part, idx) => {
+                        combinedHTML += `<span class="syl-part syl-c${idx % 4}">${part}</span>`;
+                        if (idx < parts.length - 1) combinedHTML += "•";
+                    });
+                    displayDiv.innerHTML = combinedHTML;
+                } else {
+                    displayDiv.textContent = cleanWord;
+                }
+                tooltipSpan.appendChild(displayDiv);
+
+                const micBtn = document.createElement("button");
+                micBtn.className = "btn-word-mic";
+                micBtn.innerHTML = "🎤 Verify My Voice";
+                micBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    executeWordSpeechCheck(cleanWord, wordWrapper, micBtn);
+                };
+                tooltipSpan.appendChild(micBtn);
+                wordWrapper.appendChild(tooltipSpan);
+                
+                wordWrapper.onclick = (e) => {
+                    e.stopPropagation();
+                    if (wordWrapper.classList.contains('active-syl')) {
+                        wordWrapper.classList.remove('active-syl');
+                    } else {
+                        document.querySelectorAll('.clickable-word').forEach(el => el.classList.remove('active-syl'));
+                        wordWrapper.classList.add('active-syl');
+                        triggerAudioPronounce(cleanWord);
+                    }
+                };
+                
+                container.appendChild(wordWrapper);
+            });
+        }
+
+        function triggerAudioPronounce(word) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(word);
+                utterance.lang = 'en-GB';
+                utterance.rate = 0.82;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function executeWordSpeechCheck(targetWord, elementWrapper, micButton) {
+            if (!NativeSpeechRecognition) {
+                alert("Speech recognition isn't supported in this browser.");
+                return;
+            }
+            const recognition = new NativeSpeechRecognition();
+            recognition.lang = 'en-GB';
+            recognition.interimResults = false;
+            
+            recognition.onstart = () => {
+                micButton.classList.add('recording');
+                micButton.textContent = "🛑 Speak now...";
+            };
+            recognition.onerror = () => {
+                micButton.classList.remove('recording');
+                micButton.textContent = "🎤 Try Again";
+            };
+            recognition.onend = () => micButton.classList.remove('recording');
+
+            recognition.onresult = (event) => {
+                const spokenText = event.results[0][0].transcript.toLowerCase().trim().replace(/[^a-zA-Z-]/g, "");
+                if (spokenText === targetWord) {
+                    elementWrapper.classList.remove('word-incorrect');
+                    elementWrapper.classList.add('word-correct');
+                    micButton.innerHTML = "✅ Correct!";
+                    micButton.style.background = "#16a34a";
+                } else {
+                    elementWrapper.classList.remove('word-correct');
+                    elementWrapper.classList.add('word-incorrect');
+                    micButton.innerHTML = "❌ Try Again";
+                    micButton.style.background = "#dc2626";
+                }
+                setTimeout(() => {
+                    elementWrapper.classList.remove('active-syl');
+                    micButton.innerHTML = "🎤 Verify My Voice";
+                    micButton.style.background = "#4f46e5";
+                }, 1250);
+            };
+            recognition.start();
+        }
+
+        function setupPage1Elements() {
+            // Situation 1
+            buildInteractiveParagraph("s1_sit_para", s1_data.situation);
+            buildInteractiveParagraph("s1_box_title", s1_data.title);
+            buildInteractiveParagraph("s1_box_sub", s1_data.subheading);
+            buildInteractiveParagraph("s1_box_b1", s1_data.bullet1);
+            buildInteractiveParagraph("s1_box_b2", s1_data.bullet2);
+            buildInteractiveParagraph("s1_box_aim", s1_data.aim);
+
+            // Situation 2
+            buildInteractiveParagraph("s2_sit_para", s2_data.situation);
+            buildInteractiveParagraph("s2_box_title", s2_data.title);
+            buildInteractiveParagraph("s2_box_sub", s2_data.subheading);
+            buildInteractiveParagraph("s2_box_b1", s2_data.bullet1);
+            buildInteractiveParagraph("s2_box_b2", s2_data.bullet2);
+            buildInteractiveParagraph("s2_box_aim", s2_data.aim);
+        }
+
+        function initializePage2VocabularySuite() {
+            const container = document.getElementById('vocabList');
+            container.innerHTML = "";
+            let currentCategory = "";
+
+            vocabularyData.forEach((item, index) => {
+                if (item.cat !== currentCategory) {
+                    currentCategory = item.cat;
+                    const heading = document.createElement('h2');
+                    heading.className = 'category-heading';
+                    heading.innerText = currentCategory;
+                    container.appendChild(heading);
+                }
+
+                const row = document.createElement('div');
+                row.className = 'word-row';
+
+                let syllableHTML = '';
+                item.syllables.forEach((syl, sIdx) => {
+                    if (syl === " " || syl === "-") {
+                        syllableHTML += `<span>${syl}</span>`;
+                    } else {
+                        syllableHTML += `<span class="syl-p2-${sIdx % 4}">${syl}</span>`;
+                    }
+                });
+
+                row.innerHTML = `
+                    <div class="word-index">${index + 1}</div>
+                    <div class="star-container" id="star-${index}" onclick="toggleStar(${index}, '${item.word}')">★</div>
+                    <div class="word-main" onclick="handleWordClick(${index}, '${item.word}')">
+                        <div class="word-text-wrapper">
+                            <div class="word-text">${item.word}</div>
+                            <span class="click-audio-badge">🔊 Listen &amp; Translate</span>
+                        </div>
+                        <div class="syllable-hint" id="hint-${index}">${syllableHTML}</div>
+                        <div class="chinese-hint" id="chinese-${index}">${item.ch}</div>
+                        <div class="example-sentence-hint" id="example-${index}">📝 Example: ${item.sentence}</div>
+                        <div class="transcript-feedback" id="feedback-${index}"></div>
+                    </div>
+                    <div class="actions">
+                        <span class="status-badge" id="badge-${index}"></span>
+                        <button class="btn-hint" id="hint-btn-${index}" onclick="toggleHint(${index})">💡 Hint</button>
+                        <button class="btn-example" id="example-btn-${index}" onclick="toggleExample(${index})">📝 Example</button>
+                        <button class="btn-speak" id="speak-btn-${index}" onclick="verifySuitePronunciation(${index}, '${item.word}')">🎤 Speak</button>
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        function handleWordClick(index, word) {
+            triggerAudioPronounce(word);
+            const cnElem = document.getElementById(`chinese-${index}`);
+            cnElem.style.display = (cnElem.style.display === 'block') ? 'none' : 'block';
+        }
+
+        function toggleStar(index, word) {
+            const starElem = document.getElementById(`star-${index}`);
+            if (starredWords.has(word)) {
+                starredWords.delete(word);
+                starElem.classList.remove('starred');
+            } else {
+                starredWords.add(word);
+                starElem.classList.add('starred');
+            }
+        }
+
+        function toggleHint(index) {
+            const hintElem = document.getElementById(`hint-${index}`);
+            const hintBtn = document.getElementById(`hint-btn-${index}`);
+            if (hintElem.style.display === 'block') {
+                hintElem.style.display = 'none';
+                hintBtn.classList.remove('active');
+                hintBtn.innerHTML = "💡 Hint";
+            } else {
+                hintElem.style.display = 'block';
+                hintBtn.classList.add('active');
+                hintBtn.innerHTML = "❌ Hide Hint";
+            }
+        }
+
+        function toggleExample(index) {
+            const exElem = document.getElementById(`example-${index}`);
+            const exBtn = document.getElementById(`example-btn-${index}`);
+            exElem.style.display = (exElem.style.display === 'block') ? 'none' : 'block';
+            exBtn.classList.toggle('active');
+        }
+
+        function verifySuitePronunciation(index, targetWord) {
+            if (!NativeSpeechRecognition) return;
+            const speakBtn = document.getElementById(`speak-btn-${index}`);
+            const badge = document.getElementById(`badge-${index}`);
+            const feedback = document.getElementById(`feedback-${index}`);
+            
+            const recognitionSuite = new NativeSpeechRecognition();
+            recognitionSuite.lang = 'en-GB';
+
+            speakBtn.classList.add('recording');
+            speakBtn.innerHTML = "⏳ Listening...";
+            
+            recognitionSuite.onresult = function(event) {
+                const speechResult = event.results[0][0].transcript.toLowerCase().trim();
+                const cleanTarget = targetWord.toLowerCase().replace(/[^a-zA-Z0-9]/g, '');
+                const cleanSpeech = speechResult.replace(/[^a-zA-Z0-9]/g, '');
+
+                let isCorrect = (cleanSpeech === cleanTarget);
+                badge.className = "status-badge " + (isCorrect ? "correct" : "incorrect");
+                badge.textContent = isCorrect ? "✓ Correct" : "✗ Incorrect";
+                feedback.textContent = !isCorrect ? `Heard: "${speechResult}"` : "";
+
+                studentAttempts[targetWord] = { status: isCorrect ? "Correct" : "Incorrect", heard: speechResult };
+                updateProgress();
+            };
+
+            recognitionSuite.onspeechend = () => {
+                recognitionSuite.stop();
+                speakBtn.classList.remove('recording');
+                speakBtn.innerHTML = "🎤 Speak";
+            };
+            recognitionSuite.start();
+        }
+
+        function updateProgress() {
+            const attemptedCount = Object.keys(studentAttempts).length;
+            document.getElementById('progressTracker').textContent = `Attempted: ${attemptedCount} / 50 words`;
+        }
+
+        function loadSavedName() {
+            const savedValue = localStorage.getItem(`LAN3109_studentName`);
+            if (savedValue) {
+                document.getElementById('studentName').value = savedValue;
+                document.getElementById('studentNameP2').value = savedValue;
+            }
+        }
+
+        document.addEventListener('click', () => {
+            document.querySelectorAll('.clickable-word').forEach(el => el.classList.remove('active-syl'));
+        });
+
+        function generateReport() {
+            const studentName = document.getElementById('studentName').value.trim() || "Anonymous Student";
+            let correctCount = 0;
+            let tableRowsHTML = "";
+
+            vocabularyData.forEach((item, index) => {
+                const record = studentAttempts[item.word];
+                const status = record ? record.status : "Not Attempted";
+                const heardText = (record && record.heard) ? `"${record.heard}"` : "-";
+                const isStarred = starredWords.has(item.word) ? '★' : '-';
+                
+                let statusColor = "#64748b";
+                if (status === "Correct") { correctCount++; statusColor = "#059669"; }
+                else if (status === "Incorrect") { statusColor = "#dc2626"; }
+
+                tableRowsHTML += `
+                    <tr>
+                        <td style="padding: 7px; border: 1px solid #cbd5e1; text-align: center;">${index + 1}</td>
+                        <td style="padding: 7px; border: 1px solid #cbd5e1; text-align: center; color: #f59e0b;">${isStarred}</td>
+                        <td style="padding: 7px; border: 1px solid #cbd5e1;"><strong>${item.word}</strong></td>
+                        <td style="padding: 7px; border: 1px solid #cbd5e1;">${item.ch}</td>
+                        <td style="padding: 7px; border: 1px solid #cbd5e1; color: #475569;">${item.cat}</td>
+                        <td style="padding: 7px; border: 1px solid #cbd5e1; font-weight: bold; color: ${statusColor};">${status}</td>
+                        <td style="padding: 7px; border: 1px solid #cbd5e1; font-style: italic;">${heardText}</td>
+                    </tr>
+                `;
+            });
+
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>Report_${studentName}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 20px; }
+                        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+                        th { background: #312e81; color: white; padding: 8px; text-align: left; }
+                    </style>
+                </head>
+                <body>
+                    <h2>LAN3109 Pronunciation Practice Report</h2>
+                    <p><strong>Student Name:</strong> ${studentName}</p>
+                    <p><strong>Accuracy Metric:</strong> ${correctCount} / 50 Correct</p>
+                    <table>
+                        <thead>
+                            <tr><th>No.</th><th>Review</th><th>Word</th><th>Chinese</th><th>Category</th><th>Status</th><th>Captured Voice</th></tr>
+                        </thead>
+                        <tbody>${tableRowsHTML}</tbody>
+                    </table>
+                    <script>window.onload = function() { window.print(); };<\/script>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            setupPage1Elements();
+            initializePage2VocabularySuite();
+            loadSavedName();
+        });
+    </script>
+</body>
+</html>
