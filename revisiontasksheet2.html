@@ -85,21 +85,21 @@
 
         .vtc-module {
             font-size: 1.5rem;
-            font-weight: 800;
+            font-weight: bold; /* Adjusted boldness to match .vtc-institution */
             color: #000000;
             margin-bottom: 6px;
         }
 
         .vtc-assignment {
             font-size: 1.35rem;
-            font-weight: normal; /* Unbolded as requested */
+            font-weight: bold; /* Adjusted boldness to match .vtc-institution */
             color: #000000;
             margin-bottom: 6px;
         }
 
         .vtc-title {
             font-size: 1.4rem;
-            font-weight: 800;
+            font-weight: bold; /* Adjusted boldness to match .vtc-institution */
             color: #000000;
             text-decoration: none;
             margin-top: 5px;
@@ -109,18 +109,8 @@
         .p2-vtc-header {
             width: 100%;
             margin-bottom: 30px;
-        }
-        .p2-vtc-center-group {
             text-align: center;
             color: #475569;
-            margin-bottom: 20px;
-        }
-        .p2-vtc-title {
-            font-size: 1.8rem;
-            font-weight: 800;
-            color: #000000;
-            text-align: left;
-            margin-top: 10px;
         }
 
         .vtc-instructions-box {
@@ -439,7 +429,7 @@
             display: flex;
             flex-direction: column;
             gap: 14px;
-            margin-bottom: 110px;
+            margin-bottom: 20px; /* Adjusted to fit the notice directly below */
         }
 
         .category-heading {
@@ -567,6 +557,25 @@
 
         .transcript-feedback { font-size: 0.85rem; color: var(--p2-danger); margin-top: 4px; }
 
+        /* Replicated Assessment Note Styling */
+        .assessment-notice-box {
+            width: 100%;
+            background-color: #fff5f5;
+            border: 1px dashed #f87171;
+            border-radius: 6px;
+            padding: 12px 16px;
+            margin-top: 15px;
+            margin-bottom: 110px; /* Space for fixed bottom footer */
+            text-align: left;
+            font-size: 1rem;
+            color: #dc2626;
+            font-weight: bold;
+        }
+
+        .assessment-notice-box u {
+            text-decoration: underline;
+        }
+
         .p2-footer-action-bar {
             position: fixed;
             bottom: 0; left: 0; right: 0;
@@ -581,14 +590,40 @@
             border-top: 1px solid var(--p2-border-light);
         }
 
-        .btn-report { background: linear-gradient(135deg, var(--p2-success) 0%, #047857 100%); color: white; padding: 14px 30px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; }
-        .progress-text { font-weight: 700; color: #1e293b; font-size: 1.1rem; background: #e2e2e2; padding: 8px 20px; border-radius: 30px; }
-        .btn-to-tasks { background-color: #64748b; color: white; padding: 12px 22px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+        .btn-report { 
+            background: linear-gradient(135deg, var(--p2-success) 0%, #047857 100%); 
+            color: white; 
+            padding: 14px 30px; 
+            border: none; 
+            border-radius: 8px; 
+            font-weight: 700; 
+            cursor: pointer; 
+            font-size: 1.1rem; /* Adjusted to match progress tracker font size */
+        }
+        
+        .progress-text { 
+            font-weight: 700; 
+            color: #1e293b; 
+            font-size: 1.1rem; 
+            background: #e2e2e2; 
+            padding: 8px 20px; 
+            border-radius: 30px; 
+        }
+        
+        .btn-to-tasks { 
+            background-color: #64748b; 
+            color: white; 
+            padding: 14px 24px; 
+            border: none; 
+            border-radius: 8px; 
+            font-weight: 600; 
+            cursor: pointer; 
+            font-size: 1.1rem; /* Adjusted to match progress tracker font size */
+        }
     </style>
 </head>
 <body>
 
-    <!-- ================= PAGE 1 VIEW (Task Sheet Content Replicated) ================= -->
     <div id="page1" class="page-view active">
         
         <div class="vtc-header">
@@ -613,16 +648,14 @@
                 <input type="text" id="studentName" placeholder="Type full name..." oninput="syncStudentName(this.value)">
             </div>
             <div class="instruction-tag">
-                🗣️ Click any context word below to listen to and practise its pronunciation.
+                🗣️ Click any word below to listen to and practise its pronunciation.
             </div>
         </div>
 
-        <!-- SITUATION 1 DYNAMIC BLOCK -->
         <div class="situation-card">
             <h2 class="sit-title">Situation 1</h2>
             <p class="sit-desc" id="s1_sit_para"></p>
             
-            <!-- Green Box Replication -->
             <div class="green-content-box">
                 <div class="green-box-title" id="s1_box_title"></div>
                 <div class="green-box-subheading" id="s1_box_sub"></div>
@@ -642,12 +675,10 @@
             </div>
         </div>
 
-        <!-- SITUATION 2 DYNAMIC BLOCK -->
         <div class="situation-card">
             <h2 class="sit-title">Situation 2</h2>
             <p class="sit-desc" id="s2_sit_para"></p>
             
-            <!-- Green Box Replication -->
             <div class="green-content-box">
                 <div class="green-box-title" id="s2_box_title"></div>
                 <div class="green-box-subheading" id="s2_box_sub"></div>
@@ -673,14 +704,13 @@
     </div>
 
 
-    <!-- ================= PAGE 2 VIEW (Pronunciation Suite) ================= -->
     <div id="page2" class="page-view">
-        <div class="p2-vtc-header">
-            <div class="p2-vtc-center-group">
-                <div class="vtc-institution">Vocational Training Council</div>
-                <div class="vtc-programme">Diploma of Foundation Studies</div>
-            </div>
-            <div class="p2-vtc-title">Vocabulary List</div>
+        <div class="vtc-header">
+            <div class="vtc-institution">Vocational Training Council</div>
+            <div class="vtc-programme">Diploma of Foundation Studies</div>
+            <div class="vtc-module">Vocational English IV: Oral Presentation (LAN3109F)</div>
+            <div class="vtc-assignment">Test (2025-2026)</div>
+            <div class="vtc-title">Revision Task Sheet</div>
         </div>
 
         <div class="p2-setup-box">
@@ -688,12 +718,13 @@
                 <label for="studentNameP2"><strong>Student Name:</strong></label>
                 <input type="text" id="studentNameP2" placeholder="Type full name..." readonly>
             </div>
-            <div class="instruction-tag" style="font-weight: 600;">
-                💡 <strong>Instructions:</strong> Click any word block to listen to its pronunciation and learn its Chinese meaning. You can also star (★) difficult words to prioritise and deepen your revision.
-            </div>
         </div>
 
         <div class="list-container" id="vocabList"></div>
+        
+        <div class="assessment-notice-box">
+            Note: You are <u>not</u> allowed to bring this Revision Task Sheet to the assessment.
+        </div>
 
         <div class="p2-footer-action-bar">
             <button class="btn-to-tasks" onclick="navigateToPage('page1')">⬅ Return to Tasks</button>
@@ -703,7 +734,6 @@
     </div>
 
 
-    <!-- ================= JAVASCRIPT MASTER ENGINE ================= -->
     <script>
         function navigateToPage(pageId) {
             document.querySelectorAll('.page-view').forEach(view => view.classList.remove('active'));
@@ -787,7 +817,7 @@
             { word: "early", syllables: ["ear", "ly"], ch: "早的 / 早期的", cat: "Adjectives", sentence: "An early registration guarantees a seat." },
             { word: "engaging", syllables: ["en", "gag", "ing"], ch: "引人入勝的 / 有吸引力的", cat: "Adjectives", sentence: "The speaker gave an engaging presentation." },
             { word: "exciting", syllables: ["ex", "cit", "ing"], ch: "令人興奮的", cat: "Adjectives", sentence: "The team has an exciting proposal for the event." },
-            { word: "insufficient", syllables: ["in", "suf", "fi", "cient"], ch: "不足的 / 不夠的", cat: "Adjectives", sentence: "The existing spaces are insufficient for our needs." },
+            { word: "insufficient", syllables: ["in", "suf", "fi", "cient"], ch: "不足的 / 不夠的", cat: "Adjectives", sentence: "The existant spaces are insufficient for our needs." },
             { word: "magical", syllables: ["mag", "i", "cal"], ch: "魔幻的 / 奇妙的", cat: "Adjectives", sentence: "The winter display created a magical atmosphere." },
             { word: "meaningful", syllables: ["mean", "ing", "ful"], ch: "有意義的", cat: "Adjectives", sentence: "Volunteering is a meaningful way to spend summer." },
             { word: "on-site", syllables: ["on", "-", "site"], ch: "現場的 / 在地的", cat: "Adjectives", sentence: "We provide on-site technical support during the seminar." },
@@ -838,7 +868,7 @@
 
                 const micBtn = document.createElement("button");
                 micBtn.className = "btn-word-mic";
-                micBtn.innerHTML = "🎤 Verify My Voice";
+                micBtn.innerHTML = "🎤 Say the word";
                 micBtn.onclick = (e) => {
                     e.stopPropagation();
                     executeWordSpeechCheck(cleanWord, wordWrapper, micBtn);
@@ -905,7 +935,7 @@
                 }
                 setTimeout(() => {
                     elementWrapper.classList.remove('active-syl');
-                    micButton.innerHTML = "🎤 Verify My Voice";
+                    micButton.innerHTML = "🎤 Say the word";
                     micButton.style.background = "#4f46e5";
                 }, 1250);
             };
