@@ -47,7 +47,7 @@
             background: var(--bg-gradient);
             background-attachment: fixed;
             color: var(--text);
-            padding: 40px 20px 120px 20px;
+            padding: 40px 20px 140px 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -90,8 +90,8 @@
         }
 
         .vtc-module {
-            font-size: 1.5rem;
-            font-weight: 800;
+            font-size: 1.35rem; /* Standardized to match target headers */
+            font-weight: bold;
             color: #000000;
             margin-bottom: 6px;
         }
@@ -104,29 +104,11 @@
         }
 
         .vtc-title {
-            font-size: 1.4rem;
-            font-weight: 800;
+            font-size: 1.35rem; /* Standardized to match target headers */
+            font-weight: bold;
             color: #000000;
             text-decoration: none;
             margin-top: 5px;
-        }
-
-        /* Custom alignment rules for the image style on page 2 */
-        .p2-vtc-header {
-            width: 100%;
-            margin-bottom: 30px;
-        }
-        .p2-vtc-center-group {
-            text-align: center;
-            color: #475569;
-            margin-bottom: 20px;
-        }
-        .p2-vtc-title {
-            font-size: 1.8rem;
-            font-weight: 800;
-            color: #000000;
-            text-align: left;
-            margin-top: 10px;
         }
 
         .vtc-instructions-box {
@@ -217,14 +199,17 @@
         }
 
         .instruction-tag {
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             color: var(--text-muted);
             font-weight: 600;
-            background: #ffffff;
+            background: #f8fafc;
             padding: 8px 16px;
-            border-radius: 20px;
+            border-radius: 6px;
             border: 1px solid #e2e8f0;
             line-height: 1.4;
+            margin-bottom: 14px;
+            width: fit-content;
+            text-align: left;
         }
 
         .situation-card {
@@ -243,7 +228,7 @@
         .sit-desc {
             font-size: 1.2rem;
             line-height: 1.8;
-            margin-bottom: 20px;
+            margin-bottom: 12px;
             color: #1e293b;
             background: #ffffff;
             padding: 20px;
@@ -512,7 +497,7 @@
             display: flex;
             flex-direction: column;
             gap: 14px;
-            margin-bottom: 110px;
+            margin-bottom: 20px;
         }
 
         .category-heading {
@@ -713,6 +698,30 @@
             font-weight: 500;
         }
 
+        /* --- UNIFIED ASSESSMENT REMARK BOXES --- */
+        .assessment-remark-wrapper {
+            width: 100%;
+            margin-top: 25px;
+            text-align: left;
+        }
+        
+        .p2-assessment-disclaimer-wrapper {
+            margin-bottom: 150px;
+        }
+
+        .assessment-remark-box {
+            font-size: 0.95rem;
+            font-weight: bold;
+            color: #dc2626;
+            background-color: #fef2f2;
+            padding: 12px 20px;
+            border-radius: 8px;
+            border: 1px dashed #fca5a5;
+            display: inline-block;
+            max-width: 100%;
+            line-height: 1.5;
+        }
+
         .p2-footer-action-bar {
             position: fixed;
             bottom: 0;
@@ -725,9 +734,17 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 30px;
             z-index: 500;
             border-top: 1px solid var(--p2-border-light);
+        }
+
+        .p2-footer-buttons-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            width: 100%;
+            max-width: 950px;
         }
 
         .btn-report {
@@ -794,9 +811,6 @@
                 <label for="studentName"><strong>Student Name:</strong></label>
                 <input type="text" id="studentName" placeholder="Type full name..." oninput="syncStudentName(this.value)">
             </div>
-            <div class="instruction-tag">
-                🗣️ Click any context word below to listen to and practise its pronunciation.
-            </div>
         </div>
 
         <!-- SITUATION 1 -->
@@ -804,6 +818,10 @@
             <h2 class="sit-title">Situation 1</h2>
             <p class="sit-desc" id="desc1"></p>
             
+            <div class="instruction-tag">
+                🗣️ Click any word above to listen to and practise its pronunciation.
+            </div>
+
             <div class="workspace-box">
                 <div class="section-row">
                     <div class="left-content">
@@ -843,6 +861,10 @@
             <h2 class="sit-title">Situation 2</h2>
             <p class="sit-desc" id="desc2"></p>
             
+            <div class="instruction-tag">
+                🗣️ Click any word above to listen to and practise its pronunciation.
+            </div>
+
             <div class="workspace-box">
                 <div class="section-row">
                     <div class="left-content">
@@ -877,6 +899,13 @@
             </div>
         </div>
 
+        <!-- PAGE 1 REPLICATED REMARK BOX -->
+        <div class="assessment-remark-wrapper">
+            <div class="assessment-remark-box">
+                *In the Assignment, one reason for joining the event/workshop is provided. You are required to give an additional reason and suggest a special offer for the potential participants while delivering the hotline message.
+            </div>
+        </div>
+
         <button class="nav-floating-btn" onclick="navigateToPage('page2')">
             Go to Vocabulary List (p.2) ➔
         </button>
@@ -885,12 +914,13 @@
 
     <!-- ================= PAGE 2 VIEW (Pronunciation Suite) ================= -->
     <div id="page2" class="page-view">
-        <div class="p2-vtc-header">
-            <div class="p2-vtc-center-group">
-                <div class="vtc-institution">Vocational Training Council</div>
-                <div class="vtc-programme">Diploma of Foundation Studies</div>
-            </div>
-            <div class="p2-vtc-title">Vocabulary List</div>
+        
+        <div class="vtc-header">
+            <div class="vtc-institution">Vocational Training Council</div>
+            <div class="vtc-programme">Diploma of Foundation Studies</div>
+            <div class="vtc-module">Vocational English IV: Oral Presentation (LAN3109F)</div>
+            <div class="vtc-assignment">Assignment – Reassessment (2025-2026)</div>
+            <div class="vtc-title">Revision Task Sheet</div>
         </div>
 
         <div class="p2-setup-box">
@@ -898,17 +928,24 @@
                 <label for="studentNameP2"><strong>Student Name:</strong></label>
                 <input type="text" id="studentNameP2" placeholder="Type full name..." oninput="syncStudentName(this.value)">
             </div>
-            <div class="instruction-tag">
-                💡 <strong>Instructions:</strong> Click any word block to listen to its pronunciation and learn its Chinese meaning. You can also star (★) difficult words to prioritise and deepen your revision.
-            </div>
         </div>
 
         <div class="list-container" id="vocabList"></div>
 
+        <!-- LEFT-ALIGNED REMARK DIRECTLY UNDER 50th ITEM -->
+        <div class="assessment-remark-wrapper p2-assessment-disclaimer-wrapper">
+            <div class="assessment-remark-box">
+                Note: You are <u>not</u> allowed to bring this Revision Task Sheet to the assessment.
+            </div>
+        </div>
+
+        <!-- STICKY ACTION NAV BAR -->
         <div class="p2-footer-action-bar">
-            <button class="btn-to-tasks" onclick="navigateToPage('page1')">⬅ Return to Tasks</button>
-            <span class="progress-text" id="progressTracker">Attempted: 0 / 50 words</span>
-            <button class="btn-report" id="downloadReportBtn" onclick="generateReport()">💾 Open Full Accuracy Report</button>
+            <div class="p2-footer-buttons-row">
+                <button class="btn-to-tasks" onclick="navigateToPage('page1')">⬅ Return to Tasks</button>
+                <span class="progress-text" id="progressTracker">Attempted: 0 / 50 words</span>
+                <button class="btn-report" id="downloadReportBtn" onclick="generateReport()">💾 Open Full Accuracy Report</button>
+            </div>
         </div>
     </div>
 
@@ -953,7 +990,7 @@
         const rawTextSituation1 = "You are a Project Officer at Harbour Mall. You need to record a hotline message in English about a new promotion: Easter Market.";
         const rawTextSituation2 = "You are a Marketing Officer at Maker House. You need to record a hotline message in English about a new promotion: Toy-making Workshop.";
 
-        // --- Page 2 Vocabulary Datasets + Silent Letters Injected Dynamically ---
+        // --- Page 2 Vocabulary Datasets ---
         const vocabularyData = [
             { word: "activity", syllables: ["ac", "tiv", "i", "ty"], ch: "活動", cat: "Nouns / Noun phrases", sentence: "We have an exciting activity for you today." },
             { word: "business", syllables: ["busi", "<span class='silent'>e</span>ness"], ch: "商業/生意", cat: "Nouns / Noun phrases", sentence: "He wants to start a small business soon." },
@@ -1050,7 +1087,7 @@
 
                 const micBtn = document.createElement("button");
                 micBtn.className = "btn-word-mic";
-                micBtn.innerHTML = "🎤 Verify My Voice";
+                micBtn.innerHTML = "🎤 Say the word";
                 micBtn.onclick = (e) => {
                     e.stopPropagation();
                     executeWordSpeechCheck(cleanWord, wordWrapper, micBtn);
@@ -1076,7 +1113,7 @@
         function triggerAudioPronounce(word) {
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
-                const utterance = new SpeechSynthesisUtterance(word);
+                const utterance = new SpeechSynthesisUtUtterance(word);
                 utterance.lang = 'en-GB';
                 utterance.rate = 0.82;
 
@@ -1133,7 +1170,7 @@
                 
                 setTimeout(() => {
                     elementWrapper.classList.remove('active-syl');
-                    micButton.innerHTML = "🎤 Verify My Voice";
+                    micButton.innerHTML = "🎤 Say the word";
                     micButton.style.background = "#4f46e5";
                 }, 1200);
             };
