@@ -786,7 +786,6 @@
 </head>
 <body>
 
-    <!-- ================= PAGE 1 VIEW (Task Sheet & Contexts) ================= -->
     <div id="page1" class="page-view active">
         
         <div class="vtc-header">
@@ -813,7 +812,6 @@
             </div>
         </div>
 
-        <!-- SITUATION 1 -->
         <div class="situation-card" id="card_s1">
             <h2 class="sit-title">Situation 1</h2>
             <p class="sit-desc" id="desc1"></p>
@@ -856,7 +854,6 @@
             </div>
         </div>
 
-        <!-- SITUATION 2 -->
         <div class="situation-card" id="card_s2">
             <h2 class="sit-title">Situation 2</h2>
             <p class="sit-desc" id="desc2"></p>
@@ -899,7 +896,6 @@
             </div>
         </div>
 
-        <!-- PAGE 1 REPLICATED REMARK BOX -->
         <div class="assessment-remark-wrapper">
             <div class="assessment-remark-box">
                 *In the Assignment, one reason for joining the event/workshop is provided. You are required to give an additional reason and suggest a special offer for the potential participants while delivering the hotline message.
@@ -912,7 +908,6 @@
     </div>
 
 
-    <!-- ================= PAGE 2 VIEW (Pronunciation Suite) ================= -->
     <div id="page2" class="page-view">
         
         <div class="vtc-header">
@@ -932,14 +927,12 @@
 
         <div class="list-container" id="vocabList"></div>
 
-        <!-- LEFT-ALIGNED REMARK DIRECTLY UNDER 50th ITEM -->
         <div class="assessment-remark-wrapper p2-assessment-disclaimer-wrapper">
             <div class="assessment-remark-box">
                 Note: You are <u>not</u> allowed to bring this Revision Task Sheet to the assessment.
             </div>
         </div>
 
-        <!-- STICKY ACTION NAV BAR -->
         <div class="p2-footer-action-bar">
             <div class="p2-footer-buttons-row">
                 <button class="btn-to-tasks" onclick="navigateToPage('page1')">⬅ Return to Tasks</button>
@@ -950,7 +943,6 @@
     </div>
 
 
-    <!-- ================= CONSOLIDATED JAVASCRIPT MASTER SCRIPT ================= -->
     <script>
         function navigateToPage(pageId) {
             document.querySelectorAll('.page-view').forEach(view => view.classList.remove('active'));
@@ -1113,7 +1105,7 @@
         function triggerAudioPronounce(word) {
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
-                const utterance = new SpeechSynthesisUtUtterance(word);
+                const utterance = new SpeechSynthesisUtterance(word);
                 utterance.lang = 'en-GB';
                 utterance.rate = 0.82;
 
