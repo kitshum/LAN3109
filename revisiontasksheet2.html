@@ -999,23 +999,14 @@
             "doubleu", "ex", "why", "zee", "zed"
         ]);
 
-        function checkIsSpelledOutCrossBrowser(allResultsList, durationMs, targetWord) {
-            const cleanTarget = targetWord.toLowerCase().replace(/[^a-z0-9]/g, '');
-            const targetItem = vocabularyData.find(v => v.word.toLowerCase() === targetWord.toLowerCase());
-            const syllableCount = (targetItem && targetItem.syllables) ? targetItem.syllables.length : 1;
-            
-            // 1. Dynamic Duration Guard:
-            // Allow 800ms base mic startup delay + 600ms per syllable + extra buffer for multi-word phrases.
-            // Spelling out a word takes at least 350-500ms per letter, which greatly exceeds natural pronunciation time.
-            const maxAllowedDuration = 800 + (syllableCount * 650) + (cleanTarget.length * 80);
-            
-            // 2. Multi-Alternative Inspection: Check top transcript candidates for letter sequences
-            let detectedLetterSequence = false;
+        function checkIsSpelledOutCrossBrowser(allResultsList, targetWord) {
+            // Check top transcript candidates across browser engines for spelled-out letter patterns
             for (let i = 0; i < allResultsList.length; i++) {
                 const transcript = allResultsList[i].transcript.trim().toLowerCase();
                 const tokens = transcript.split(/[\s-]+/).filter(t => t.length > 0);
                 
-                if (tokens.length >= 3) { // Require at least 3 distinct tokens to consider it a spelled out word
+                // Spelling out requires at least 3 distinct single-letter tokens or spoken letter names
+                if (tokens.length >= 3) {
                     let letterCount = 0;
                     tokens.forEach(tok => {
                         if (tok.length === 1 && /[a-z]/i.test(tok)) {
@@ -1025,16 +1016,12 @@
                         }
                     });
 
-                    if ((letterCount / tokens.length) >= 0.6 || letterCount >= 3) {
-                        detectedLetterSequence = true;
-                        break;
+                    // Only trigger if majority of recognized tokens are distinct single letters/letter names
+                    if ((letterCount / tokens.length) >= 0.75 && letterCount >= 3) {
+                        return true;
                     }
                 }
             }
-
-            // Only flag as spelled out if explicitly recognized as letter tokens OR duration drastically exceeds realistic limit
-            if (detectedLetterSequence) return true;
-            if (durationMs > Math.max(maxAllowedDuration, 2800)) return true;
 
             return false;
         }
@@ -1050,7 +1037,7 @@
                 alternatives.push(eventResults[0][i]);
             }
 
-            const isSpelled = checkIsSpelledOutCrossBrowser(alternatives, durationMs, targetWord);
+            const isSpelled = checkIsSpelledOutCrossBrowser(alternatives, targetWord);
             if (isSpelled) {
                 return { isValid: false, reason: "spelled_out" };
             }
@@ -1200,13 +1187,18 @@
             recognition.interimResults = false;
             recognition.maxAlternatives = 5; // Enable cross-browser alternatives check
             
-            let speechStartTime = 0;
+            let speechStartTime = Date.now();
 
             recognition.onstart = () => {
                 speechStartTime = Date.now();
                 micButton.classList.add('recording');
                 micButton.textContent = "🛑 Speak now...";
             };
+
+            recognition.onspeechstart = () => {
+                speechStartTime = Date.now();
+            };
+
             recognition.onerror = () => {
                 micButton.classList.remove('recording');
                 micButton.textContent = "🎤 Try Again";
@@ -1374,12 +1366,16 @@
             recognitionSuite.lang = 'en-GB';
             recognitionSuite.maxAlternatives = 5; // Enable cross-browser alternatives check
 
-            let speechStartTime = 0;
+            let speechStartTime = Date.now();
 
             recognitionSuite.onstart = () => {
                 speechStartTime = Date.now();
                 speakBtn.classList.add('recording');
                 speakBtn.innerHTML = "⏳ Listening...";
+            };
+
+            recognitionSuite.onspeechstart = () => {
+                speechStartTime = Date.now();
             };
             
             recognitionSuite.onresult = function(event) {
