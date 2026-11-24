@@ -1000,23 +1000,22 @@
         ]);
 
         function checkIsSpelledOutCrossBrowser(allResultsList, durationMs, targetWord) {
-            // 1. Time-Duration Guard: Spelling out a target word takes significantly longer than saying it naturally.
-            // Target words are 1-2 words maximum. Speaking a single target word naturally takes under 1.8 seconds.
             const cleanTarget = targetWord.toLowerCase().replace(/[^a-z0-9]/g, '');
-            const targetWordLength = cleanTarget.length;
+            const targetItem = vocabularyData.find(v => v.word.toLowerCase() === targetWord.toLowerCase());
+            const syllableCount = (targetItem && targetItem.syllables) ? targetItem.syllables.length : 1;
             
-            // Allow up to 2.2 seconds for longer multi-word terms like "meet-and-greet" or "value-added", but shorter for single words
-            const maxDurationThreshold = targetWordLength > 8 ? 2400 : 1800;
-            if (durationMs > maxDurationThreshold) {
-                return true; // Flagged as spelled out due to excessive speech duration
-            }
-
-            // 2. Multi-Alternative Inspection: Check top transcript candidates
+            // 1. Dynamic Duration Guard:
+            // Allow 800ms base mic startup delay + 600ms per syllable + extra buffer for multi-word phrases.
+            // Spelling out a word takes at least 350-500ms per letter, which greatly exceeds natural pronunciation time.
+            const maxAllowedDuration = 800 + (syllableCount * 650) + (cleanTarget.length * 80);
+            
+            // 2. Multi-Alternative Inspection: Check top transcript candidates for letter sequences
+            let detectedLetterSequence = false;
             for (let i = 0; i < allResultsList.length; i++) {
                 const transcript = allResultsList[i].transcript.trim().toLowerCase();
                 const tokens = transcript.split(/[\s-]+/).filter(t => t.length > 0);
                 
-                if (tokens.length > 1) {
+                if (tokens.length >= 3) { // Require at least 3 distinct tokens to consider it a spelled out word
                     let letterCount = 0;
                     tokens.forEach(tok => {
                         if (tok.length === 1 && /[a-z]/i.test(tok)) {
@@ -1026,12 +1025,16 @@
                         }
                     });
 
-                    // If more than 50% of tokens or 3+ tokens are individual letters / letter names
-                    if ((letterCount / tokens.length) >= 0.5 || letterCount >= 3) {
-                        return true;
+                    if ((letterCount / tokens.length) >= 0.6 || letterCount >= 3) {
+                        detectedLetterSequence = true;
+                        break;
                     }
                 }
             }
+
+            // Only flag as spelled out if explicitly recognized as letter tokens OR duration drastically exceeds realistic limit
+            if (detectedLetterSequence) return true;
+            if (durationMs > Math.max(maxAllowedDuration, 2800)) return true;
 
             return false;
         }
@@ -1061,7 +1064,7 @@
 
             // High-precision stress checking threshold (Cross-browser normalized)
             // Only apply confidence checking on Chrome / Supported browsers that output accurate non-zero confidence scores
-            const requiredMinConfidence = 0.75;
+            const requiredMinConfidence = 0.70;
             const targetItem = vocabularyData.find(v => v.word.toLowerCase() === targetWord.toLowerCase());
 
             if (targetItem && targetItem.syllables.length > 1) {
