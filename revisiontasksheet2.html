@@ -990,24 +990,64 @@
         const starredWords = new Set();
         const NativeSpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-        function checkIsSpelledOut(transcript) {
-            if (!transcript) return false;
-            const tokens = transcript.trim().toLowerCase().split(/[\s-]+/).filter(t => t.length > 0);
-            if (tokens.length <= 1) return false;
-            
-            let singleLetterCount = 0;
-            tokens.forEach(tok => {
-                if (tok.length === 1 && /[a-z]/i.test(tok)) {
-                    singleLetterCount++;
-                }
-            });
+        // Expanded Cross-Browser Spelling Detection
+        const letterSpokenNames = new Set([
+            "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", 
+            "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z",
+            "bee", "see", "dee", "ef", "gee", "aitch", "eye", "jay", "kay", "el", 
+            "em", "en", "oh", "pee", "cue", "ar", "ess", "tee", "you", "vee", 
+            "doubleu", "ex", "why", "zee", "zed"
+        ]);
 
-            return (singleLetterCount / tokens.length) >= 0.5 || singleLetterCount >= 3;
+        function checkIsSpelledOutCrossBrowser(allResultsList, durationMs, targetWord) {
+            // 1. Time-Duration Guard: Spelling out a target word takes significantly longer than saying it naturally.
+            // Target words are 1-2 words maximum. Speaking a single target word naturally takes under 1.8 seconds.
+            const cleanTarget = targetWord.toLowerCase().replace(/[^a-z0-9]/g, '');
+            const targetWordLength = cleanTarget.length;
+            
+            // Allow up to 2.2 seconds for longer multi-word terms like "meet-and-greet" or "value-added", but shorter for single words
+            const maxDurationThreshold = targetWordLength > 8 ? 2400 : 1800;
+            if (durationMs > maxDurationThreshold) {
+                return true; // Flagged as spelled out due to excessive speech duration
+            }
+
+            // 2. Multi-Alternative Inspection: Check top transcript candidates
+            for (let i = 0; i < allResultsList.length; i++) {
+                const transcript = allResultsList[i].transcript.trim().toLowerCase();
+                const tokens = transcript.split(/[\s-]+/).filter(t => t.length > 0);
+                
+                if (tokens.length > 1) {
+                    let letterCount = 0;
+                    tokens.forEach(tok => {
+                        if (tok.length === 1 && /[a-z]/i.test(tok)) {
+                            letterCount++;
+                        } else if (letterSpokenNames.has(tok)) {
+                            letterCount++;
+                        }
+                    });
+
+                    // If more than 50% of tokens or 3+ tokens are individual letters / letter names
+                    if ((letterCount / tokens.length) >= 0.5 || letterCount >= 3) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
-        // Advanced verification: Checks if speech confidence, word structure & stress emphasis match
-        function evaluatePronunciationWithStress(rawTranscript, confidence, targetWord) {
-            const isSpelled = checkIsSpelledOut(rawTranscript);
+        // Advanced verification: Checks if speech confidence, word structure & stress emphasis match across all browsers
+        function evaluatePronunciationWithStress(eventResults, durationMs, targetWord) {
+            const rawTranscript = eventResults[0][0].transcript;
+            const confidence = eventResults[0][0].confidence;
+
+            // Collect all candidate transcripts for alternative parsing
+            const alternatives = [];
+            for (let i = 0; i < eventResults[0].length; i++) {
+                alternatives.push(eventResults[0][i]);
+            }
+
+            const isSpelled = checkIsSpelledOutCrossBrowser(alternatives, durationMs, targetWord);
             if (isSpelled) {
                 return { isValid: false, reason: "spelled_out" };
             }
@@ -1019,13 +1059,13 @@
                 return { isValid: false, reason: "mispronounced" };
             }
 
-            // High-precision stress checking threshold
-            // Speech Recognition engines report lower confidence scores (< 0.82) when word stress placement is altered
-            const requiredMinConfidence = 0.80;
+            // High-precision stress checking threshold (Cross-browser normalized)
+            // Only apply confidence checking on Chrome / Supported browsers that output accurate non-zero confidence scores
+            const requiredMinConfidence = 0.75;
             const targetItem = vocabularyData.find(v => v.word.toLowerCase() === targetWord.toLowerCase());
 
             if (targetItem && targetItem.syllables.length > 1) {
-                if (confidence !== undefined && confidence > 0 && confidence < requiredMinConfidence) {
+                if (confidence !== undefined && confidence > 0.01 && confidence < requiredMinConfidence) {
                     return { isValid: false, reason: "incorrect_stress" };
                 }
             }
@@ -1155,8 +1195,12 @@
             const recognition = new NativeSpeechRecognition();
             recognition.lang = 'en-GB';
             recognition.interimResults = false;
+            recognition.maxAlternatives = 5; // Enable cross-browser alternatives check
             
+            let speechStartTime = 0;
+
             recognition.onstart = () => {
+                speechStartTime = Date.now();
                 micButton.classList.add('recording');
                 micButton.textContent = "🛑 Speak now...";
             };
@@ -1167,11 +1211,8 @@
             recognition.onend = () => micButton.classList.remove('recording');
 
             recognition.onresult = (event) => {
-                const speechResultObj = event.results[0][0];
-                const rawTranscript = speechResultObj.transcript;
-                const confidence = speechResultObj.confidence;
-
-                const evalResult = evaluatePronunciationWithStress(rawTranscript, confidence, targetWord);
+                const durationMs = Date.now() - speechStartTime;
+                const evalResult = evaluatePronunciationWithStress(event.results, durationMs, targetWord);
 
                 if (evalResult.isValid) {
                     elementWrapper.classList.remove('word-incorrect');
@@ -1328,16 +1369,21 @@
             
             const recognitionSuite = new NativeSpeechRecognition();
             recognitionSuite.lang = 'en-GB';
+            recognitionSuite.maxAlternatives = 5; // Enable cross-browser alternatives check
 
-            speakBtn.classList.add('recording');
-            speakBtn.innerHTML = "⏳ Listening...";
+            let speechStartTime = 0;
+
+            recognitionSuite.onstart = () => {
+                speechStartTime = Date.now();
+                speakBtn.classList.add('recording');
+                speakBtn.innerHTML = "⏳ Listening...";
+            };
             
             recognitionSuite.onresult = function(event) {
-                const resultObj = event.results[0][0];
-                const speechResult = resultObj.transcript;
-                const confidence = resultObj.confidence;
+                const durationMs = Date.now() - speechStartTime;
+                const speechResult = event.results[0][0].transcript;
 
-                const evalResult = evaluatePronunciationWithStress(speechResult, confidence, targetWord);
+                const evalResult = evaluatePronunciationWithStress(event.results, durationMs, targetWord);
                 let isCorrect = evalResult.isValid;
 
                 badge.className = "status-badge " + (isCorrect ? "correct" : "incorrect");
@@ -1365,6 +1411,12 @@
                 speakBtn.classList.remove('recording');
                 speakBtn.innerHTML = "🎤 Speak";
             };
+
+            recognitionSuite.onerror = () => {
+                speakBtn.classList.remove('recording');
+                speakBtn.innerHTML = "🎤 Speak";
+            };
+
             recognitionSuite.start();
         }
 
