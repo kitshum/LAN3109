@@ -1146,7 +1146,7 @@
 
             const rawTranscript = hypotheses[0];
 
-            // 1. MUST check if the user spelled out the word letter by letter BEFORE testing whole-word matches
+            // 1. Check if the user spelled out the word letter by letter BEFORE testing whole-word matches
             if (isSpelledOutSpeech(eventResults, targetWord)) {
                 return { isValid: false, reason: "spelled_out", resultText: rawTranscript };
             }
@@ -1158,8 +1158,7 @@
             for (let i = 0; i < hypotheses.length; i++) {
                 const rawAlt = hypotheses[i];
                 const altText = rawAlt.toLowerCase().replace(/[^a-z0-9]/g, '');
-                
-                // Ensure alternative is not formatted as individual spaced letters
+
                 const altTokens = rawAlt.split(/[\s.\-_,]+/).filter(t => t.length > 0);
                 const isSpelledAlt = (altTokens.length >= Math.ceil(cleanTarget.length * 0.5) && cleanTarget.length > 2);
 
@@ -1170,10 +1169,6 @@
             }
 
             if (matchedTarget) {
-                // 3. Speech-Duration Guardrail for slow letter-by-letter spelling auto-corrected by Safari
-                if (exceedsSpellingDurationGuardrail(targetWord, elapsedMs)) {
-                    return { isValid: false, reason: "spelled_out", resultText: rawTranscript };
-                }
                 return { isValid: true, reason: "correct", resultText: rawTranscript };
             }
 
