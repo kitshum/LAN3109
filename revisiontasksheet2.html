@@ -589,6 +589,7 @@
         .status-badge { padding: 8px 14px; border-radius: 8px; font-size: 0.9rem; font-weight: 700; display: none; }
         .status-badge.correct { background-color: var(--p2-success-light); color: var(--p2-success); display: inline-block; }
         .status-badge.incorrect { background-color: var(--p2-danger-light); color: var(--p2-danger); display: inline-block; }
+        .status-badge.warning { background-color: #fef3c7; color: #d97706; display: inline-block; }
 
         .transcript-feedback { font-size: 0.85rem; color: var(--p2-danger); margin-top: 4px; }
 
@@ -919,20 +920,6 @@
             "watching": ["watch", "ing"]
         };
 
-        // Primary stress syllable index (0-based) for strict stress checking
-        const stressPatternMap = {
-            "accident": 0, "appeal": 1, "attraction": 1, "audience": 0, "awareness": 1,
-            "booth": 0, "carnival": 0, "challenge": 0, "community": 1, "corner": 0,
-            "danger": 0, "equipment": 1, "experience": 1, "first aid": 0, "government": 0,
-            "health": 0, "incentive": 1, "interest": 0, "liaison": 1, "participation": 3,
-            "preparation": 2, "profit": 0, "programme": 0, "resource": 0, "satisfaction": 2,
-            "seminar": 0, "session": 0, "snack": 0, "sponsorship": 0, "station": 0,
-            "supervisor": 0, "venue": 0, "volunteer": 2, "voucher": 0, "weather": 0,
-            "workplace": 0, "workload": 0, "worksite": 0, "appealing": 1, "deluxe": 1,
-            "insufficient": 2, "interactive": 2, "meet-and-greet": 0, "on-site": 0, "positive": 0,
-            "public": 0, "short-term": 0, "technical": 0, "value-added": 0, "enough": 1
-        };
-
         const vocabularyData = [
             { word: "accident", syllables: ["ˈac", "ci", "dent"], ch: "意外 / 事故", sentence: "We must take safety measures to prevent workplace accidents.", chSentence: "我們必須採取安全措施以防止工作場所意外發生。", cat: "Nouns/Noun phrases" },
             { word: "appeal", syllables: ["ap", "ˈpeal"], ch: "吸引力 / 呼籲", sentence: "The new promotion has strong appeal for movie fans.", chSentence: "這項新宣傳活動對影迷具有極大的吸引力。", cat: "Nouns/Noun phrases" },
@@ -969,9 +956,9 @@
             { word: "volunteer", syllables: ["vol", "un", "ˈteer"], ch: "志願者 / 義工", sentence: "Volunteers will help manage the crowd at the entrance.", chSentence: "義工將協助管理入口處的人流。", cat: "Nouns/Noun phrases" },
             { word: "voucher", syllables: ["ˈvou", "cher"], ch: "禮券 / 優惠券", sentence: "Participants receive a free popcorn voucher upon entry.", chSentence: "參與者入場時可獲贈免費爆谷券。", cat: "Nouns/Noun phrases" },
             { word: "weather", syllables: ["ˈwea", "ther"], ch: "天氣", sentence: "In case of bad weather, outdoor activities will move indoors.", chSentence: "如遇惡劣天氣，戶外活動將移至室內進行。", cat: "Nouns/Noun phrases" },
-            { word: "workplace", syllables: ["ˈwork", "place"], ch: "工作場所", sentence: "Maintaining a safe workplace environment is mandatory.", chSentence: "維持安全的工作場所環境是強制要求的。", cat: "Nouns/Noun phrases" },
+            { word: "workplace", syllables: ["ˈwork", "place"], ch: "工作場所", sentence: "Maintaining a safe workplace environment is mandatory.", chSentence: "維護安全的工作場所環境是強制要求的。", cat: "Nouns/Noun phrases" },
             { word: "workload", syllables: ["ˈwork", "load"], ch: "工作量", sentence: "Proper scheduling helps reduce staff workload stress.", chSentence: "妥善的時間安排有助於減輕員工的工作量壓力。", cat: "Nouns/Noun phrases" },
-            { word: "worksite", syllables: ["ˈwork", "site"], ch: "工作地盤 / 工地", sentence: "Safety helmets are required at all construction worksites.", chSentence: "所有施工工地均須佩戴安全帽。", cat: "Nouns/Noun phrases" },
+            { word: "worksite", syllables: ["ˈwork", "site"], ch: "工作地盤 / 工地", sentence: "Safety helmets are required at all construction worksites.", chSentence: "所有施工工地均須佩戴安全帽。", cat: "Adjectives" },
             { word: "appealing", syllables: ["ap", "ˈpea", "ling"], ch: "吸引人的", sentence: "The new movie package offers an appealing price.", chSentence: "全新電影套票提供令人心動的優惠價格。", cat: "Adjectives" },
             { word: "deluxe", syllables: ["de", "ˈluxe"], ch: "豪華的 / 高級的", sentence: "Passes include deluxe seating and complimentary drinks.", chSentence: "通行券包含豪華座位和免費飲料。", cat: "Adjectives" },
             { word: "insufficient", syllables: ["in", "suf", "ˈfi", "cient"], ch: "不足的 / 不夠的", sentence: "Current promotional efforts are insufficient to drive sales.", chSentence: "目前的宣傳力度不足以推動銷售額。", cat: "Adjectives" },
@@ -990,77 +977,207 @@
         const starredWords = new Set();
         const NativeSpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-        // Expanded Cross-Browser Spelling Detection
+        // Phonetic names of English letters for cross-browser letter-spelling detection (Edge, Safari & Chrome)
         const letterSpokenNames = new Set([
             "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", 
             "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z",
-            "bee", "see", "dee", "ef", "gee", "aitch", "eye", "jay", "kay", "el", 
-            "em", "en", "oh", "pee", "cue", "ar", "ess", "tee", "you", "vee", 
-            "doubleu", "ex", "why", "zee", "zed"
+            "ay", "ey", "bee", "be", "see", "ce", "dee", "de", "ef", "eff", "gee", "ge", 
+            "aitch", "haitch", "ach", "eye", "ai", "jay", "je", "kay", "ka", "el", "ell", 
+            "em", "en", "oh", "o", "pee", "pe", "cue", "kew", "kyu", "ar", "are", 
+            "ess", "es", "tee", "te", "you", "u", "vee", "ve", 
+            "doubleu", "double-u", "double u", "ex", "eks", "why", "wai", "zee", "zed"
         ]);
 
-        function checkIsSpelledOutCrossBrowser(allResultsList, targetWord) {
-            // Check top transcript candidates across browser engines for spelled-out letter patterns
-            for (let i = 0; i < allResultsList.length; i++) {
-                const transcript = allResultsList[i].transcript.trim().toLowerCase();
-                const tokens = transcript.split(/[\s-]+/).filter(t => t.length > 0);
-                
-                // Spelling out requires at least 3 distinct single-letter tokens or spoken letter names
-                if (tokens.length >= 3) {
-                    let letterCount = 0;
+        /**
+         * Multi-Segment Hypothesis Scanning:
+         * Inspects every recognition alternative across all paused segments returned by Edge and Safari.
+         */
+        function collectAllHypotheses(eventResults) {
+            const hypotheses = [];
+            if (!eventResults || typeof eventResults.length !== "number") {
+                return hypotheses;
+            }
+
+            for (let segIdx = 0; segIdx < eventResults.length; segIdx++) {
+                const segment = eventResults[segIdx];
+                if (!segment || typeof segment.length !== "number") continue;
+
+                for (let altIdx = 0; altIdx < segment.length; altIdx++) {
+                    const alt = segment[altIdx];
+                    if (alt && typeof alt.transcript === "string") {
+                        const trimmed = alt.transcript.trim();
+                        if (trimmed.length > 0) {
+                            hypotheses.push(trimmed);
+                        }
+                    }
+                }
+            }
+            return hypotheses;
+        }
+
+        /**
+         * Enhanced multi-engine spelled-out checker optimized specifically for Edge & Safari WebKit engines.
+         * Detects dotted letters ("A. P. P. E. A. L."), all-caps acronym collapses ("VENUE", "BOOTH"),
+         * and spoken "double [letter]" phrases before .toLowerCase() strips the casing.
+         */
+        function isSpelledOutSpeech(eventResults, targetWord) {
+            const cleanTargetLetters = targetWord.toLowerCase().replace(/[^a-z]/g, '');
+            if (!cleanTargetLetters || cleanTargetLetters.length < 2) return false;
+
+            const hypotheses = collectAllHypotheses(eventResults);
+
+            for (let h = 0; h < hypotheses.length; h++) {
+                const rawCandidate = hypotheses[h];
+
+                // Check BEFORE .toLowerCase() strips casing:
+                // 1) Dotted letters such as "A. P. P. E. A. L." or "A.P.P.E.A.L."
+                const dottedLetterMatches = rawCandidate.match(/\b[A-Za-z]\s*\./g);
+                if (dottedLetterMatches && dottedLetterMatches.length >= 2) {
+                    const dottedLettersJoined = dottedLetterMatches
+                        .map(m => m.replace(/[^A-Za-z]/g, '').toLowerCase())
+                        .join('');
+                    if (
+                        dottedLettersJoined === cleanTargetLetters ||
+                        dottedLettersJoined.startsWith(cleanTargetLetters) ||
+                        cleanTargetLetters.startsWith(dottedLettersJoined) ||
+                        dottedLetterMatches.length >= Math.ceil(cleanTargetLetters.length * 0.6)
+                    ) {
+                        return true;
+                    }
+                }
+
+                // 2) All-caps acronym collapse (e.g., "VENUE", "BOOTH", "APPEAL") when length >= 3
+                const allCapsWords = rawCandidate.match(/\b[A-Z]{2,}\b/g);
+                if (allCapsWords) {
+                    for (let c = 0; c < allCapsWords.length; c++) {
+                        const capsToken = allCapsWords[c];
+                        if (capsToken.length >= 3 && capsToken.toLowerCase() === cleanTargetLetters) {
+                            return true;
+                        }
+                    }
+                }
+
+                const lowerCandidate = rawCandidate.toLowerCase();
+
+                // 3) Spoken "double [letter]" phrases (e.g., "double o", "double p", "d double o r")
+                const doubleLetterRegex = /\bdouble\s+([a-z]|ay|ey|bee|be|see|ce|dee|de|ef|eff|gee|ge|aitch|haitch|ach|eye|ai|jay|je|kay|ka|el|ell|em|en|oh|o|pee|pe|cue|kew|kyu|ar|are|ess|es|tee|te|you|u|vee|ve|doubleu|ex|eks|why|wai|zee|zed)\b/g;
+                if (doubleLetterRegex.test(lowerCandidate)) {
+                    const expandedDouble = lowerCandidate.replace(
+                        /\bdouble\s+([a-z0-9-]+)\b/g,
+                        (_, letterName) => `${letterName} ${letterName}`
+                    );
+                    const expandedTokens = expandedDouble.split(/[\s.\-_,]+/).filter(t => t.length > 0);
+                    let expandedLetterCount = 0;
+                    expandedTokens.forEach(tok => {
+                        if ((tok.length === 1 && /[a-z]/i.test(tok)) || letterSpokenNames.has(tok)) {
+                            expandedLetterCount++;
+                        }
+                    });
+                    if (expandedTokens.length >= 2 && (expandedLetterCount / expandedTokens.length) >= 0.50 && expandedLetterCount >= 2) {
+                        return true;
+                    }
+                }
+
+                // Extract tokens separated by spaces, hyphens, dots, or commas
+                const tokens = lowerCandidate.split(/[\s.\-_,]+/).filter(t => t.length > 0);
+                const lettersOnlyStr = lowerCandidate.replace(/[^a-z]/g, '');
+
+                // Strategy 1: Edge & Safari space out individual letter tokens (e.g. "a c c i d e n t" or "a - c - c - i - d - e - n - t")
+                if (tokens.length >= 2) {
+                    let letterTokenCount = 0;
                     tokens.forEach(tok => {
                         if (tok.length === 1 && /[a-z]/i.test(tok)) {
-                            letterCount++;
+                            letterTokenCount++;
                         } else if (letterSpokenNames.has(tok)) {
-                            letterCount++;
+                            letterTokenCount++;
                         }
                     });
 
-                    // Only trigger if majority of recognized tokens are distinct single letters/letter names
-                    if ((letterCount / tokens.length) >= 0.75 && letterCount >= 3) {
+                    // If 50%+ of spoken tokens are single letters or letter names and there are 2 or more tokens
+                    if ((letterTokenCount / tokens.length) >= 0.50 && letterTokenCount >= 2) {
+                        return true;
+                    }
+                }
+
+                // Strategy 2: If the combined letters match the target word, but transcript has 3+ separate tokens
+                if (lettersOnlyStr === cleanTargetLetters && tokens.length >= 3) {
+                    return true;
+                }
+
+                // Strategy 3: Check if transcript contains spaced individual letters matching target prefix
+                if (tokens.length >= cleanTargetLetters.length && cleanTargetLetters.length > 2) {
+                    let matchedSingleLetters = 0;
+                    for (let i = 0; i < Math.min(tokens.length, cleanTargetLetters.length); i++) {
+                        const t = tokens[i];
+                        if (t === cleanTargetLetters[i] || letterSpokenNames.has(t)) {
+                            matchedSingleLetters++;
+                        }
+                    }
+                    if (matchedSingleLetters >= Math.ceil(cleanTargetLetters.length * 0.75)) {
                         return true;
                     }
                 }
             }
-
             return false;
         }
 
-        // Advanced verification: Checks if speech confidence, word structure & stress emphasis match across all browsers
-        function evaluatePronunciationWithStress(eventResults, durationMs, targetWord) {
-            const rawTranscript = eventResults[0][0].transcript;
-            const confidence = eventResults[0][0].confidence;
+        /**
+         * Speech-Duration Guardrail:
+         * Flags slow letter-by-letter spelling (> 2.7s for single words, > 3.6s for multi-word items)
+         * even when Safari auto-corrects it into the whole word.
+         */
+        function exceedsSpellingDurationGuardrail(targetWord, elapsedMs) {
+            if (typeof elapsedMs !== "number" || !Number.isFinite(elapsedMs) || elapsedMs <= 0) {
+                return false;
+            }
+            const isMultiWord = /[\s\-]+/.test(targetWord.trim());
+            const thresholdMs = isMultiWord ? 3600 : 2700;
+            return elapsedMs > thresholdMs;
+        }
 
-            // Collect all candidate transcripts for alternative parsing
-            const alternatives = [];
-            for (let i = 0; i < eventResults[0].length; i++) {
-                alternatives.push(eventResults[0][i]);
+        /**
+         * Comprehensive Pronunciation & Accuracy Evaluator across Chrome, Edge, and Safari
+         */
+        function evaluatePronunciationWithStress(eventResults, targetWord, elapsedMs = 0) {
+            const hypotheses = collectAllHypotheses(eventResults);
+            if (hypotheses.length === 0) {
+                return { isValid: false, reason: "mispronounced", resultText: "" };
             }
 
-            const isSpelled = checkIsSpelledOutCrossBrowser(alternatives, targetWord);
-            if (isSpelled) {
-                return { isValid: false, reason: "spelled_out" };
+            const rawTranscript = hypotheses[0];
+
+            // 1. MUST check if the user spelled out the word letter by letter BEFORE testing whole-word matches
+            if (isSpelledOutSpeech(eventResults, targetWord)) {
+                return { isValid: false, reason: "spelled_out", resultText: rawTranscript };
             }
 
             const cleanTarget = targetWord.toLowerCase().replace(/[^a-z0-9]/g, '');
-            const cleanSpeech = rawTranscript.toLowerCase().replace(/[^a-z0-9]/g, '');
 
-            if (cleanSpeech !== cleanTarget) {
-                return { isValid: false, reason: "mispronounced" };
-            }
+            // 2. Cross-check all hypotheses across all segments for natural whole-word match
+            let matchedTarget = false;
+            for (let i = 0; i < hypotheses.length; i++) {
+                const rawAlt = hypotheses[i];
+                const altText = rawAlt.toLowerCase().replace(/[^a-z0-9]/g, '');
+                
+                // Ensure alternative is not formatted as individual spaced letters
+                const altTokens = rawAlt.split(/[\s.\-_,]+/).filter(t => t.length > 0);
+                const isSpelledAlt = (altTokens.length >= Math.ceil(cleanTarget.length * 0.5) && cleanTarget.length > 2);
 
-            // High-precision stress checking threshold (Cross-browser normalized)
-            // Only apply confidence checking on Chrome / Supported browsers that output accurate non-zero confidence scores
-            const requiredMinConfidence = 0.70;
-            const targetItem = vocabularyData.find(v => v.word.toLowerCase() === targetWord.toLowerCase());
-
-            if (targetItem && targetItem.syllables.length > 1) {
-                if (confidence !== undefined && confidence > 0.01 && confidence < requiredMinConfidence) {
-                    return { isValid: false, reason: "incorrect_stress" };
+                if (altText === cleanTarget && !isSpelledAlt) {
+                    matchedTarget = true;
+                    break;
                 }
             }
 
-            return { isValid: true, reason: "correct" };
+            if (matchedTarget) {
+                // 3. Speech-Duration Guardrail for slow letter-by-letter spelling auto-corrected by Safari
+                if (exceedsSpellingDurationGuardrail(targetWord, elapsedMs)) {
+                    return { isValid: false, reason: "spelled_out", resultText: rawTranscript };
+                }
+                return { isValid: true, reason: "correct", resultText: rawTranscript };
+            }
+
+            return { isValid: false, reason: "mispronounced", resultText: rawTranscript };
         }
 
         function createClickableWordElement(rawWord) {
@@ -1185,18 +1302,18 @@
             const recognition = new NativeSpeechRecognition();
             recognition.lang = 'en-GB';
             recognition.interimResults = false;
-            recognition.maxAlternatives = 5; // Enable cross-browser alternatives check
-            
-            let speechStartTime = Date.now();
+            recognition.maxAlternatives = 5;
+
+            let speechStartTime = null;
 
             recognition.onstart = () => {
-                speechStartTime = Date.now();
+                speechStartTime = performance.now();
                 micButton.classList.add('recording');
                 micButton.textContent = "🛑 Speak now...";
             };
 
             recognition.onspeechstart = () => {
-                speechStartTime = Date.now();
+                speechStartTime = performance.now();
             };
 
             recognition.onerror = () => {
@@ -1206,21 +1323,19 @@
             recognition.onend = () => micButton.classList.remove('recording');
 
             recognition.onresult = (event) => {
-                const durationMs = Date.now() - speechStartTime;
-                const evalResult = evaluatePronunciationWithStress(event.results, durationMs, targetWord);
+                const elapsedMs = speechStartTime !== null ? (performance.now() - speechStartTime) : 0;
+                const evalResult = evaluatePronunciationWithStress(event.results, targetWord, elapsedMs);
 
                 if (evalResult.isValid) {
                     elementWrapper.classList.remove('word-incorrect');
                     elementWrapper.classList.add('word-correct');
-                    micButton.innerHTML = "✅ Correct Stress!";
+                    micButton.innerHTML = "✅ Correct!";
                     micButton.style.background = "#16a34a";
                 } else {
                     elementWrapper.classList.remove('word-correct');
                     elementWrapper.classList.add('word-incorrect');
-                    if (evalResult.reason === "incorrect_stress") {
-                        micButton.innerHTML = "⚠️ Stress Error!";
-                    } else if (evalResult.reason === "spelled_out") {
-                        micButton.innerHTML = "❌ Don't Spell!";
+                    if (evalResult.reason === "spelled_out") {
+                        micButton.innerHTML = "⚠️ Don't spell!";
                     } else {
                         micButton.innerHTML = "❌ Try Again";
                     }
@@ -1230,7 +1345,7 @@
                     elementWrapper.classList.remove('active-syl');
                     micButton.innerHTML = "🎤 Say the word";
                     micButton.style.background = "#4f46e5";
-                }, 1400);
+                }, 1600);
             };
             recognition.start();
         }
@@ -1364,44 +1479,43 @@
             
             const recognitionSuite = new NativeSpeechRecognition();
             recognitionSuite.lang = 'en-GB';
-            recognitionSuite.maxAlternatives = 5; // Enable cross-browser alternatives check
+            recognitionSuite.maxAlternatives = 5;
 
-            let speechStartTime = Date.now();
+            let speechStartTime = null;
 
             recognitionSuite.onstart = () => {
-                speechStartTime = Date.now();
+                speechStartTime = performance.now();
                 speakBtn.classList.add('recording');
                 speakBtn.innerHTML = "⏳ Listening...";
             };
 
             recognitionSuite.onspeechstart = () => {
-                speechStartTime = Date.now();
+                speechStartTime = performance.now();
             };
-            
+
             recognitionSuite.onresult = function(event) {
-                const durationMs = Date.now() - speechStartTime;
-                const speechResult = event.results[0][0].transcript;
+                const elapsedMs = speechStartTime !== null ? (performance.now() - speechStartTime) : 0;
+                const hypotheses = collectAllHypotheses(event.results);
+                const evalResult = evaluatePronunciationWithStress(event.results, targetWord, elapsedMs);
+                const speechResult = evalResult.resultText || (hypotheses[0] || "");
 
-                const evalResult = evaluatePronunciationWithStress(event.results, durationMs, targetWord);
-                let isCorrect = evalResult.isValid;
-
-                badge.className = "status-badge " + (isCorrect ? "correct" : "incorrect");
-                badge.textContent = isCorrect ? "✓ Correct Stress" : "X Incorrect";
-
-                if (isCorrect) {
-                    feedback.textContent = `✓ Correct pronunciation & syllable stress!`;
-                } else if (evalResult.reason === "incorrect_stress") {
-                    const targetItem = vocabularyData[index];
-                    const stressIdx = stressPatternMap[targetWord.toLowerCase()];
-                    const stressedSyl = (targetItem && targetItem.syllables[stressIdx]) ? targetItem.syllables[stressIdx].replace('ˈ', '') : "";
-                    feedback.textContent = `X Stress error! Focus emphasis on the stressed syllable: "${stressedSyl.toUpperCase()}" (Heard: "${speechResult}")`;
+                if (evalResult.isValid) {
+                    badge.className = "status-badge correct";
+                    badge.textContent = "✓ Correct";
+                    feedback.textContent = `✓ Correct pronunciation!`;
+                    studentAttempts[targetWord] = { status: "Correct", heard: speechResult };
                 } else if (evalResult.reason === "spelled_out") {
-                    feedback.textContent = `X Incorrect (Please pronounce the word naturally, do not spell out letters: "${speechResult}")`;
+                    badge.className = "status-badge warning";
+                    badge.textContent = "⚠️ Don't spell";
+                    feedback.textContent = `⚠️ Don't spell! Please pronounce the whole word. (Heard: "${speechResult}")`;
+                    studentAttempts[targetWord] = { status: "Incorrect", heard: `[Spelled out]: ${speechResult}` };
                 } else {
+                    badge.className = "status-badge incorrect";
+                    badge.textContent = "X Incorrect";
                     feedback.textContent = `X Incorrect (Heard: "${speechResult}")`;
+                    studentAttempts[targetWord] = { status: "Incorrect", heard: speechResult };
                 }
 
-                studentAttempts[targetWord] = { status: isCorrect ? "Correct" : "Incorrect", heard: speechResult };
                 updateProgress();
             };
 
@@ -1500,3 +1614,4 @@
     </script>
 </body>
 </html>
+```[cite: 1]
